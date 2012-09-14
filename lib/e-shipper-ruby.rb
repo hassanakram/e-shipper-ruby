@@ -3,8 +3,10 @@ require 'net/http'
 require 'builder'
 
 module EShipperRuby
-  def request_quote(url = "http://www.e-shipper.net/rpc2", *options)
-    request = post(url, build_request_quote_body(*options))
+  def self.quote_request(options, packages, url = "http://test.eshipper.com/eshipper/rpc2")
+    request = build_quote_request_body(options, packages)
+    puts request
+    post(url, request)
   end
 
   def self.build_quote_request_body(options, packages)
@@ -25,6 +27,10 @@ module EShipperRuby
         quote.Pickup(options[:Pickup])
       end
     end
+  end
+
+  def self.shipping_request(options,packages,references,url = "")
+    post(url, build_shipping_request_body(options,packages,references))
   end
 
   def self.build_shipping_request_body(options, packages, references)
@@ -57,7 +63,7 @@ module EShipperRuby
     end
   end
 
-  def post(url, request_body)
+  def self.post(url, request_body)
     uri = URI(url)
     http_request = Net::HTTP::Post.new(uri.path)
 
