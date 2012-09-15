@@ -5,26 +5,28 @@ require 'builder'
 module EShipperRuby
   def self.quote_request(options, packages, url = "http://test.eshipper.com/eshipper/rpc2")
     request = build_quote_request_body(options, packages)
+    puts url
     puts request
     post(url, request)
   end
 
   def self.build_quote_request_body(options, packages)
-    builder = Builder::XmlMarkup.new
+    builder = Builder::XmlMarkup.new(:indent=>2)
     builder.instruct!
     builder.EShipper(options[:EShipper]) do |eshipper|
       eshipper.QuoteRequest(options[:QuoteRequest]) do |quote|
         quote.From(options[:From])
         quote.To(options[:To])
-        quote.COD(options[:COD]) do |cod|
-          cod.CODReturnAddress(options[:CODReturnAddress])
+        if options[:COD] then quote.COD(options[:COD]) do |cod|
+            cod.CODReturnAddress(options[:CODReturnAddress])
+          end
         end
         quote.Packages(options[:Packages]) do |packs|
           packages.each do |package|
             packs.Package(package)
           end
         end
-        quote.Pickup(options[:Pickup])
+        if options[:Pickup] then quote.Pickup(options[:Pickup]) end
       end
     end
   end
@@ -34,30 +36,32 @@ module EShipperRuby
   end
 
   def self.build_shipping_request_body(options, packages, references)
-    builder = Builder::XmlMarkup.new
+    builder = Builder::XmlMarkup.new(:indent=>2)
     builder.instruct!
     builder.EShipper(options[:EShipper]) do |eshipper|
       eshipper.ShippingRequest(options[:QuoteRequest]) do |quote|
         quote.From(options[:From])
         quote.To(options[:To])
-        quote.COD(options[:COD]) do |cod|
-          cod.CODReturnAddress(options[:CODReturnAddress])
+        if options[:COD] then quote.COD(options[:COD]) do |cod|
+            cod.CODReturnAddress(options[:CODReturnAddress])
+          end
         end
         quote.Packages(options[:Packages]) do |packs|
           packages.each do |package|
             packs.Package(package)
           end
         end
-        quote.Pickup(options[:Pickup])
+        if options[:Pickup] then quote.Pickup(options[:Pickup]) end
         quote.Payment(options[:Payment])
         references.each do |reference|
           quote.Reference(reference)
         end
-        quote.CustomsInvoice(options[:CustomsInvoice]) do |invoice|
-          invoice.BillTo(options[:CustomsInvoice][:BillTo])
-          invoice.Contact(options[:CustomsInvoice][:Contact])
-          invoice.Item(options[:CustomsInvoice][:Item])
-          invoice.DutiesTaxes(options[:CustomsInvoice][:DutiesTaxes])
+        if options[:CustomsInvoice] then quote.CustomsInvoice(options[:CustomsInvoice]) do |invoice|
+            invoice.BillTo(options[:CustomsInvoice][:BillTo])
+            invoice.Contact(options[:CustomsInvoice][:Contact])
+            invoice.Item(options[:CustomsInvoice][:Item])
+            if options[:DutiesTaxes] then invoice.DutiesTaxes(options[:CustomsInvoice][:DutiesTaxes])
+          end
         end
       end
     end
