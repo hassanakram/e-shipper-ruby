@@ -3,7 +3,7 @@ require 'builder'
 
 module EShipper
 
-  def self.quote_request(options, packages, url = "http://test.eshipper.com/eshipper/rpc2")
+  def self.quote_request(options, packages, url = 'http://test.eshipper.com/eshipper/rpc2')
     post(url, build_quote_request_body(options, packages))
   end
 
@@ -28,7 +28,7 @@ module EShipper
     end
   end
 
-  def self.shipping_request(options,packages,references,url = "")
+  def self.shipping_request(options,packages,references,url = 'http://test.eshipper.com/eshipper/rpc2')
     post(url, build_shipping_request_body(options, packages, references))
   end
 
@@ -50,8 +50,9 @@ module EShipper
         end
         if options[:Pickup] then quote.Pickup(options[:Pickup]) end
         quote.Payment(options[:Payment])
-        references.each do |reference|
-          quote.Reference(reference)
+        unless references.empty? then references.each do |reference|
+            quote.Reference(reference)
+          end
         end
         if options[:CustomsInvoice] then quote.CustomsInvoice(options[:CustomsInvoice]) do |invoice|
             invoice.BillTo(options[:CustomsInvoice][:BillTo])
