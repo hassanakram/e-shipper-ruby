@@ -20,7 +20,7 @@ class EShipperRubyTest  < Test::Unit::TestCase
   end
 
   def test_quote_request
-    response = EShipperRuby.quote_request(@options, @packages)
+    response = EShipper.quote_request(@options, @packages)
     puts response.body.to_s
     assert_match /QuoteReply/, response.body.to_s
     assert_match /Quote/, response.body.to_s

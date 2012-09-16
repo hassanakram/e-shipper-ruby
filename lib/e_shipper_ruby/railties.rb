@@ -4,7 +4,5 @@ module EShipperRuby
   require 'rails'
 
   class Railtie < Rails::Railtie
-
   end
-
 end
