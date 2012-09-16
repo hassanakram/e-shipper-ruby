@@ -1,7 +1,7 @@
 require 'test/unit'
-require 'e-shipper-ruby'
+require 'e_shipper_ruby'
 
-class EshipperTest  < Test::Unit::TestCase
+class EShipperRubyTest  < Test::Unit::TestCase
 
   def setup
     @options = {:EShipper => {:xmlns=>"http://www.eshipper.net/XMLSchema",

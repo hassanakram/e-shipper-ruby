@@ -1,4 +1,11 @@
-require "e-shipper-ruby/version"
+require "e_shipper_ruby/version"
+
+# If we are using Rails then we will include the Mongoid railtie. This has all
+# the nifty initializers that Mongoid needs.
+if defined?(Rails)
+  require "mongoid/railtie"
+end
+
 require 'net/http'
 require 'builder'
 
@@ -60,7 +67,7 @@ module EShipperRuby
             invoice.BillTo(options[:CustomsInvoice][:BillTo])
             invoice.Contact(options[:CustomsInvoice][:Contact])
             invoice.Item(options[:CustomsInvoice][:Item])
-            if options[:DutiesTaxes] then invoice.DutiesTaxes(options[:CustomsInvoice][:DutiesTaxes])
+            if options[:DutiesTaxes] then invoice.DutiesTaxes(options[:CustomsInvoice][:DutiesTaxes]) end
           end
         end
       end
