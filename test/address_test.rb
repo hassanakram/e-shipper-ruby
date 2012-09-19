@@ -10,6 +10,7 @@ class AddressTest  < Test::Unit::TestCase
 
     assert address.validate!
     assert_equal "Vitamonthly", address.company
+    assert_equal "eshipper@vitamonthly.com", address.email
   end
 
   def test_invalid_address

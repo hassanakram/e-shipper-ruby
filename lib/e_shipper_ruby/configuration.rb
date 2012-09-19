@@ -5,7 +5,7 @@ module EShipperRuby
                   :password,
                   :server_url
 
-    def initialize #:nodoc:
+    def initialize
       @username   = ENV['ESHIPPER_USERNAME']
       @password   = ENV['ESHIPPER_PASSWORD']
       @server_url = ENV['ESHIPPER_SERVER_URL']

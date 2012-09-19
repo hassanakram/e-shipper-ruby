@@ -1,3 +1,5 @@
+require 'e_shipper_ruby/classes/open_struct'
+
 class Package < OpenStruct
   POSSIBLE_FIELDS = [
     :length,
