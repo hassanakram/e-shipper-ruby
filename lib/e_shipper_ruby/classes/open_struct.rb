@@ -1,4 +1,5 @@
 class OpenStruct
+  attr_reader :attributes
 
   def initialize(attributes = {})
     @attributes = {}

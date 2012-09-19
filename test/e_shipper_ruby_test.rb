@@ -12,13 +12,14 @@ class EShipperRubyTest  < Test::Unit::TestCase
       :zip=>"K1G0E6", :country=>"CA", :phone=>"888-888-8888", :attention => "Vitamonthly",
       :email => "eshipper@vitamonthly.com"})
 
-    @options = {:EShipper => {:xmlns=>"http://www.eshipper.net/XMLSchema",
-        :username=>"vitamonthly", :password=>"1234", :version=>"3.0.0"},
+    t = Time.now + 5 * 24 * 60 * 60 # 5 days from now
+
+    @options = {:EShipper => {:username=>"vitamonthly", :password=>"1234", :version=>"3.0.0"},
       :QuoteRequest=>{:insuranceType=>"Carrier"},
       :From => from, :To => to,
       :Packages=>{:type=>"Package"},
-      :Pickup=>{:contactName=>"Test Name", :phoneNumber=>"888-888-8888", :pickupDate=>"2012-09-20", :pickupTime=>"16:30",
-        :closingTime=>"17:45", :location=>"Front Door"}}
+      :Pickup=>{:contactName=>"Test Name", :phoneNumber=>"888-888-8888", :pickupDate => t.strftime("%Y-%m-%d"),
+        :pickupTime => t.strftime("%H:%M"), :closingTime => (t+2*60*60).strftime("%H:%M"), :location=>"Front Door"}}
 
     package1 = Package.new({:length=>"15", :width=>"10", :height=>"12", :weight=>"10",
       :insuranceAmount=>"120"})
@@ -28,19 +29,23 @@ class EShipperRubyTest  < Test::Unit::TestCase
     @packages = [package1, package2]
   end
 
-#  def test_quote_request
-#    response = EShipper.quote_request(@options, @packages)
-#    puts response.body.to_s
-#    assert_match /QuoteReply/, response.body.to_s
-#    assert_match /Surcharge/, response.body.to_s
-#  end
+  def test_quote_request
+    response = EShipper.quote_request(@options, @packages)
+    puts response.body.to_s
+    assert_match /QuoteReply/, response.body.to_s
+    assert_match /Surcharge/, response.body.to_s
+  end
 
-#  def test_shipping_request
-#    response = EShipper.shipping_request(@options, @packages, [])
-#    puts response.body.to_s
-#    assert_match /ShippingReply/, response.body.to_s
-#    assert_match /Order/, response.body.to_s
-#    assert_match /Carrier/, response.body.to_s
-#    assert_match /Surcharge/, response.body.to_s
-#  end
+  def test_shipping_request
+    reference1 = Reference.new(:name => "Vitamonthly", :code => "123")
+    reference2 = Reference.new(:name => "Heroku", :code => "456")
+    references = [reference1, reference2]
+
+    response = EShipper.shipping_request(@options, @packages, references)
+    puts response.body.to_s
+    assert_match /ShippingReply/, response.body.to_s
+    assert_match /Order/, response.body.to_s
+    assert_match /Carrier/, response.body.to_s
+    assert_match /Surcharge/, response.body.to_s
+  end
 end

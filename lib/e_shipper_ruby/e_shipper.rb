@@ -4,23 +4,25 @@ require 'builder'
 module EShipper
 
   def self.quote_request(options, packages, url = 'http://test.eshipper.com/eshipper/rpc2')
-    post(url, build_quote_request_body(options, packages))
+    request = build_quote_request_body(options, packages)
+    puts request
+    post(url, request)
   end
 
   def self.build_quote_request_body(options, packages)
-    builder = Builder::XmlMarkup.new(:indent=>2)
-    builder.instruct!
-    builder.EShipper(options[:EShipper]) do |eshipper|
+    request = Builder::XmlMarkup.new(:indent=>2)
+    request.instruct!
+    request.EShipper(options[:EShipper], :xmlns=>"http://www.eshipper.net/XMLSchema") do |eshipper|
       eshipper.QuoteRequest(options[:QuoteRequest]) do |quote|
-        quote.From(options[:From])
-        quote.To(options[:To])
+        quote.From(options[:From].attributes)
+        quote.To(options[:To].attributes)
         if options[:COD] then quote.COD(options[:COD]) do |cod|
             cod.CODReturnAddress(options[:CODReturnAddress])
           end
         end
         quote.Packages(options[:Packages]) do |packs|
           packages.each do |package|
-            packs.Package(package)
+            packs.Package(package.attributes)
           end
         end
         if options[:Pickup] then quote.Pickup(options[:Pickup]) end
@@ -28,30 +30,32 @@ module EShipper
     end
   end
 
-  def self.shipping_request(options,packages,references,url = 'http://test.eshipper.com/eshipper/rpc2')
-    post(url, build_shipping_request_body(options, packages, references))
+  def self.shipping_request(options, packages, references, url = 'http://test.eshipper.com/eshipper/rpc2')
+    request = build_shipping_request_body(options, packages, references)
+    puts request
+    post(url, request)
   end
 
-  def self.build_shipping_request_body(options, packages, references)
-    builder = Builder::XmlMarkup.new(:indent=>2)
-    builder.instruct!
-    builder.EShipper(options[:EShipper]) do |eshipper|
+  def self.build_shipping_request_body(options, packages, references = [])
+    request = Builder::XmlMarkup.new(:indent=>2)
+    request.instruct!
+    request.EShipper(options[:EShipper], :xmlns=>"http://www.eshipper.net/XMLSchema") do |eshipper|
       eshipper.ShippingRequest(options[:QuoteRequest]) do |quote|
-        quote.From(options[:From])
-        quote.To(options[:To])
+        quote.From(options[:From].attributes)
+        quote.To(options[:To].attributes)
         if options[:COD] then quote.COD(options[:COD]) do |cod|
             cod.CODReturnAddress(options[:CODReturnAddress])
           end
         end
         quote.Packages(options[:Packages]) do |packs|
           packages.each do |package|
-            packs.Package(package)
+            packs.Package(package.attributes)
           end
         end
         if options[:Pickup] then quote.Pickup(options[:Pickup]) end
         quote.Payment(options[:Payment])
         unless references.empty? then references.each do |reference|
-            quote.Reference(reference)
+            quote.Reference(reference.attributes)
           end
         end
         if options[:CustomsInvoice] then quote.CustomsInvoice(options[:CustomsInvoice]) do |invoice|
