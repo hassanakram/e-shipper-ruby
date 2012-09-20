@@ -3,13 +3,13 @@ require 'builder'
 
 module EShipper
 
-  def self.quote_request(options, packages, url = 'http://test.eshipper.com/eshipper/rpc2')
-    request = build_quote_request_body(options, packages)
+  def self.quote_request(options, url = 'http://test.eshipper.com/eshipper/rpc2')
+    request = build_quote_request_body(options)
     puts request
     post(url, request)
   end
 
-  def self.build_quote_request_body(options, packages)
+  def self.build_quote_request_body(options)
     request = Builder::XmlMarkup.new(:indent=>2)
     request.instruct!
     request.EShipper(options[:EShipper], :xmlns=>"http://www.eshipper.net/XMLSchema") do |eshipper|
@@ -21,22 +21,22 @@ module EShipper
           end
         end
         quote.Packages(options[:Packages]) do |packs|
-          packages.each do |package|
+          options[:PackagesList].each do |package|
             packs.Package(package.attributes)
           end
         end
-        if options[:Pickup] then quote.Pickup(options[:Pickup]) end
+        if options[:Pickup] then quote.Pickup(options[:Pickup].attributes) end
       end
     end
   end
 
-  def self.shipping_request(options, packages, references, url = 'http://test.eshipper.com/eshipper/rpc2')
-    request = build_shipping_request_body(options, packages, references)
+  def self.shipping_request(options, url = 'http://test.eshipper.com/eshipper/rpc2')
+    request = build_shipping_request_body(options)
     puts request
     post(url, request)
   end
 
-  def self.build_shipping_request_body(options, packages, references = [])
+  def self.build_shipping_request_body(options)
     request = Builder::XmlMarkup.new(:indent=>2)
     request.instruct!
     request.EShipper(options[:EShipper], :xmlns=>"http://www.eshipper.net/XMLSchema") do |eshipper|
@@ -48,13 +48,13 @@ module EShipper
           end
         end
         quote.Packages(options[:Packages]) do |packs|
-          packages.each do |package|
+          options[:PackagesList].each do |package|
             packs.Package(package.attributes)
           end
         end
-        if options[:Pickup] then quote.Pickup(options[:Pickup]) end
+        if options[:Pickup] then quote.Pickup(options[:Pickup].attributes) end
         quote.Payment(options[:Payment])
-        unless references.empty? then references.each do |reference|
+        unless options[:References].empty? then options[:References].each do |reference|
             quote.Reference(reference.attributes)
           end
         end

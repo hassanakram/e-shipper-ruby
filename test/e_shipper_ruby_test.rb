@@ -1,5 +1,6 @@
 require 'test/unit'
 require 'e_shipper_ruby'
+require 'e_shipper_ruby/classes/pickup'
 
 class EShipperRubyTest  < Test::Unit::TestCase
 
@@ -14,23 +15,25 @@ class EShipperRubyTest  < Test::Unit::TestCase
 
     t = Time.now + 5 * 24 * 60 * 60 # 5 days from now
 
-    @options = {:EShipper => {:username=>"vitamonthly", :password=>"1234", :version=>"3.0.0"},
-      :QuoteRequest=>{:insuranceType=>"Carrier"},
-      :From => from, :To => to,
-      :Packages=>{:type=>"Package"},
-      :Pickup=>{:contactName=>"Test Name", :phoneNumber=>"888-888-8888", :pickupDate => t.strftime("%Y-%m-%d"),
-        :pickupTime => t.strftime("%H:%M"), :closingTime => (t+2*60*60).strftime("%H:%M"), :location=>"Front Door"}}
+    pickup = Pickup.new({:contactName=>"Test Name", :phoneNumber=>"888-888-8888", :pickupDate => t.strftime("%Y-%m-%d"),
+        :pickupTime => t.strftime("%H:%M"), :closingTime => (t+2*60*60).strftime("%H:%M"), :location=>"Front Door"})
 
     package1 = Package.new({:length=>"15", :width=>"10", :height=>"12", :weight=>"10",
       :insuranceAmount=>"120"})
     package2 = Package.new({:length=>"15", :width=>"10", :height=>"10", :weight=>"5",
       :insuranceAmount=>"120"})
 
-    @packages = [package1, package2]
+    packages = [package1, package2]
+
+    @options = {:EShipper => {:username=>"vitamonthly", :password=>"1234", :version=>"3.0.0"},
+      :QuoteRequest=>{:insuranceType=>"Carrier"},
+      :From => from, :To => to,
+      :Packages=>{:type=>"Package"}, :PackagesList => packages,
+      :Pickup=>pickup}
   end
 
   def test_quote_request
-    response = EShipper.quote_request(@options, @packages)
+    response = EShipper.quote_request(@options)
     puts response.body.to_s
     assert_match /QuoteReply/, response.body.to_s
     assert_match /Surcharge/, response.body.to_s
@@ -41,7 +44,9 @@ class EShipperRubyTest  < Test::Unit::TestCase
     reference2 = Reference.new(:name => "Heroku", :code => "456")
     references = [reference1, reference2]
 
-    response = EShipper.shipping_request(@options, @packages, references)
+    @options[:References] = references
+
+    response = EShipper.shipping_request(@options)
     puts response.body.to_s
     assert_match /ShippingReply/, response.body.to_s
     assert_match /Order/, response.body.to_s
