@@ -4,9 +4,9 @@ require 'e_shipper_ruby/classes/address'
 class AddressTest  < Test::Unit::TestCase
 
   def test_valid_address
-    address = Address.new({:company=>"Vitamonthly", :address1=>"650 CIT Drive", :city=>"Livingston", :state=>"ON",
-      :zip=>"L4J7Y9", :country=>"CA", :phone=>"888-888-8888", :attention => "Vitamonthly",
-      :email => "eshipper@vitamonthly.com"})
+    address = Address.new({:id => "123", :company=>"Vitamonthly", :address1=>"650 CIT Drive", :address2=>"Apt B-2",
+      :city=>"Livingston", :state=>"ON", :zip=>"L4J7Y9", :country=>"CA", :phone=>"888-888-8888",
+      :attention => "Vitamonthly", :email => "eshipper@vitamonthly.com"})
 
     assert address.validate!
     assert_equal "Vitamonthly", address.company

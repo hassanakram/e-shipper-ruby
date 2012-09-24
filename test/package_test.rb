@@ -5,7 +5,7 @@ class PackageTest  < Test::Unit::TestCase
 
   def test_valid_package
     package = Package.new({:length=>"15", :width=>"10", :height=>"12", :weight=>"10",
-      :insuranceAmount=>"120"})
+      :insuranceAmount=>"120", :codAmount=>"120"})
 
     assert package.validate!
     assert_equal "15", package.length

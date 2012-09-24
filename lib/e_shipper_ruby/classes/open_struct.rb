@@ -19,7 +19,9 @@ class OpenStruct
     raise ArgumentError, "#{self.class::REQUIRED_FIELDS.join(', ')} are required" if @attributes.empty?
     @attributes.each do |k, v|
       raise ArgumentError, "#{k} is not a valid #{self.class.name} field" unless self.class::POSSIBLE_FIELDS.include?(k.to_sym)
-      raise ArgumentError, "#{k} is required for #{self.class.name} type" unless self.class::REQUIRED_FIELDS.include?(k.to_sym)
+    end
+    self.class::REQUIRED_FIELDS.each do |k|
+      raise ArgumentError, "#{k} is required for #{self.class.name} type" unless @attributes.has_key?(k.to_s)
     end
     return true
   end

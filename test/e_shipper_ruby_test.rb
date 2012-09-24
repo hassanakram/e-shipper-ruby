@@ -1,17 +1,16 @@
 require 'test/unit'
 require 'e_shipper_ruby'
-require 'e_shipper_ruby/classes/pickup'
 
 class EShipperRubyTest  < Test::Unit::TestCase
 
   def setup
-    from = Address.new({:company => "Vitamonthly", :address1 => "650 CIT Drive", :city => "Livingston", :state => "ON",
-      :zip => "L4J7Y9", :country => "CA", :phone => "888-888-8888", :attention => "Vitamonthly",
-      :email => "eshipper@vitamonthly.com"})
+    from = Address.new({:id => "123", :company => "Vitamonthly", :address1 => "650 CIT Drive", :address2=>"Apt B-2",
+      :city => "Livingston", :state => "ON", :zip => "L4J7Y9", :country => "CA", :phone => "888-888-8888",
+      :attention => "Vitamonthly", :email => "eshipper@vitamonthly.com"})
 
-    to = Address.new({:company => "Home", :address1 => "1725 Riverside Drive", :city => "Ottawa", :state => "ON",
-      :zip => "K1G0E6", :country => "CA", :phone => "888-888-8888", :attention => "Vitamonthly",
-      :email => "eshipper@vitamonthly.com"})
+    to = Address.new({:id => "456", :company => "Home", :address1 => "1725 Riverside Drive", :address2=>"Apt B-2",
+      :city => "Ottawa", :state => "ON", :zip => "K1G0E6", :country => "CA", :phone => "888-888-8888",
+      :attention => "Vitamonthly", :email => "eshipper@vitamonthly.com"})
 
     t = Time.now + 5 * 24 * 60 * 60 # 5 days from now
 
@@ -19,9 +18,9 @@ class EShipperRubyTest  < Test::Unit::TestCase
         :pickupTime => t.strftime("%H:%M"), :closingTime => (t+2*60*60).strftime("%H:%M"), :location => "Front Door"})
 
     package1 = Package.new({:length => "15", :width => "10", :height => "12", :weight => "10",
-      :insuranceAmount => "120"})
+      :insuranceAmount => "120", :codAmount => "120"})
     package2 = Package.new({:length => "15", :width => "10", :height => "10", :weight => "5",
-      :insuranceAmount => "120"})
+      :insuranceAmount => "120", :codAmount => "120"})
 
     packages = [package1, package2]
 
@@ -34,9 +33,9 @@ class EShipperRubyTest  < Test::Unit::TestCase
 
   def test_quote_request
     response = EShipper.quote_request(@options)
-    puts response.body.to_s
-    assert_match /QuoteReply/, response.body.to_s
-    assert_match /Surcharge/, response.body.to_s
+
+    assert response.include?("QuoteReply"), "No QuoteReply received"
+    assert response.include?("Surcharge"), "No Surcharge received"
   end
 
   def test_shipping_request
@@ -45,12 +44,13 @@ class EShipperRubyTest  < Test::Unit::TestCase
     references = [reference1, reference2]
 
     @options[:References] = references
+    @options[:Payment] = {:type => "3rd Party"}
 
     response = EShipper.shipping_request(@options)
-    puts response.body.to_s
-    assert_match /ShippingReply/, response.body.to_s
-    assert_match /Order/, response.body.to_s
-    assert_match /Carrier/, response.body.to_s
-    assert_match /Surcharge/, response.body.to_s
+
+    assert response.include?("ShippingReply")
+    assert response.include?("Order")
+    assert response.include?("Carrier")
+    assert response.include?("Surcharge")
   end
 end
