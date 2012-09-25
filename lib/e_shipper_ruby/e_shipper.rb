@@ -16,7 +16,10 @@ module EShipper
     options[:EShipper][:password] ||= EShipperRuby.configuration.password
     raise EShipperRubyError, "No password specified." unless options[:EShipper][:password]
 
-    url ||= EShipperRuby.configuration.server_url || 'http://test.eshipper.com/eshipper/rpc2'
+    url = 'http://test.eshipper.com/eshipper/rpc2'
+    if defined?(Rails.env)
+      url = 'http://www.eshipper.com/rpc2' if Rails.env == 'production'
+    end
 
     request = send("build_#{type}_request_body", options)
 
@@ -24,8 +27,6 @@ module EShipper
     puts request
 
     response = post(url, request)
-
-    puts response
 
     return XmlSimple.xml_in(response.body)
   end
