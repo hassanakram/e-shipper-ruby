@@ -9,9 +9,8 @@ module EShipper
     puts url
     puts request
     response = post(url, request)
-    puts response
     puts response.body
-    return XmlSimple.xml_in(response.body.to_s)
+    return XmlSimple.xml_in(response.body)
   end
 
   def self.build_quote_request_body(options)
@@ -40,9 +39,8 @@ module EShipper
     puts url
     puts request
     response = post(url, request)
-    puts response
     puts response.body
-    return XmlSimple.xml_in(response.body.to_s)
+    return XmlSimple.xml_in(response.body)
   end
 
   def self.build_shipping_request_body(options)

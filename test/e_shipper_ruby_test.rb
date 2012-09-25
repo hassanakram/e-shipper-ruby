@@ -31,11 +31,18 @@ class EShipperRubyTest  < Test::Unit::TestCase
       :Pickup => pickup}
   end
 
+  def assert_include(container, include_child)
+    container.each do |element|
+      assert element.include?(include_child), "#{include_child} not included"
+    end
+  end
+
   def test_quote_request
     response = EShipper.quote_request(@options)
 
-    assert response.include?("QuoteReply"), "No QuoteReply received"
-    assert response.include?("Surcharge"), "No Surcharge received"
+    assert response.include?("QuoteReply"), "QuoteReply not included"
+    assert_include response["QuoteReply"], "Quote"
+    assert_include response["QuoteReply"][0]["Quote"], "Surcharge"
   end
 
   def test_shipping_request
@@ -48,9 +55,11 @@ class EShipperRubyTest  < Test::Unit::TestCase
 
     response = EShipper.shipping_request(@options)
 
-    assert response.include?("ShippingReply")
-    assert response.include?("Order")
-    assert response.include?("Carrier")
-    assert response.include?("Surcharge")
+    assert response.include?("ShippingReply"), "ShippingReply not included"
+    assert_include response["ShippingReply"], "Order"
+    assert_include response["ShippingReply"], "Package"
+    assert_include response["ShippingReply"], "TrackingURL"
+    assert_include response["ShippingReply"], "Quote"
+    assert_include response["ShippingReply"][0]["Quote"], "Surcharge"
   end
 end

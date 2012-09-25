@@ -1,5 +1,3 @@
-require 'e_shipper_ruby/classes/open_struct'
-
 class Address < OpenStruct
 
   POSSIBLE_FIELDS = [

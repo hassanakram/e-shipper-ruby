@@ -1,6 +1,11 @@
-require 'e_shipper_ruby/e_shipper'
-require 'e_shipper_ruby/configuration'
 require 'e_shipper_ruby/version'
+require 'e_shipper_ruby/configuration'
+require 'e_shipper_ruby/e_shipper'
+require 'e_shipper_ruby/classes/open_struct'
+require 'e_shipper_ruby/classes/address'
+require 'e_shipper_ruby/classes/package'
+require 'e_shipper_ruby/classes/pickup'
+require 'e_shipper_ruby/classes/reference'
 
 module EShipperRuby
 
@@ -31,8 +36,7 @@ module EShipperRuby
   end
 end
 
-# If we are using Rails then we will include the Mongoid railtie. This has all
-# the nifty initializers that Mongoid needs.
+# If we are using Rails then we will include the EShipperRuby railtie.
 if defined?(Rails)
   require 'e_shipper_ruby/railtie'
 end
