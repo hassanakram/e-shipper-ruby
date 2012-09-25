@@ -1,10 +1,10 @@
 require 'test/unit'
-require 'e_shipper_ruby/classes/package'
+require 'e_shipper_ruby'
 
 class PackageTest  < Test::Unit::TestCase
 
   def test_valid_package
-    package = Package.new({:length=>"15", :width=>"10", :height=>"12", :weight=>"10",
+    package = EShipper::Package.new({:length=>"15", :width=>"10", :height=>"12", :weight=>"10",
       :insuranceAmount=>"120", :codAmount=>"120"})
 
     assert package.validate!
@@ -13,10 +13,10 @@ class PackageTest  < Test::Unit::TestCase
   end
 
   def test_invalid_address
-    package1 = Package.new
+    package1 = EShipper::Package.new
     assert_raise(ArgumentError) { package1.validate! }
 
-    package2 = Package.new({:invalid => "invalid"})
+    package2 = EShipper::Package.new({:invalid => "invalid"})
     assert_raise(ArgumentError) { package2.validate! }
   end
 end

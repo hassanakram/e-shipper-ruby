@@ -1,11 +1,11 @@
-require 'e_shipper_ruby/classes/open_struct'
+module EShipper
+  class Reference < OpenStruct
 
-class Reference < OpenStruct
+    POSSIBLE_FIELDS = [
+      :name, :code
+    ]
 
-  POSSIBLE_FIELDS = [
-    :name, :code
-  ]
+    REQUIRED_FIELDS = POSSIBLE_FIELDS
 
-  REQUIRED_FIELDS = POSSIBLE_FIELDS
-
+  end
 end

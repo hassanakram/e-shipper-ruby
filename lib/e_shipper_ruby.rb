@@ -1,11 +1,6 @@
 require 'e_shipper_ruby/version'
 require 'e_shipper_ruby/configuration'
 require 'e_shipper_ruby/e_shipper'
-require 'e_shipper_ruby/classes/open_struct'
-require 'e_shipper_ruby/classes/address'
-require 'e_shipper_ruby/classes/package'
-require 'e_shipper_ruby/classes/pickup'
-require 'e_shipper_ruby/classes/reference'
 
 module EShipperRuby
 
@@ -33,6 +28,9 @@ module EShipperRuby
 
     original_config.each { |key, value| configuration.send("#{key}=", value) }
     result
+  end
+
+  class EShipperRubyError < StandardError
   end
 end
 

@@ -1,10 +1,42 @@
 require 'net/http'
 require 'builder'
 require 'xmlsimple'
+require 'e_shipper_ruby/classes/open_struct'
+require 'e_shipper_ruby/classes/address'
+require 'e_shipper_ruby/classes/package'
+require 'e_shipper_ruby/classes/pickup'
+require 'e_shipper_ruby/classes/reference'
 
 module EShipper
 
+  def self.send_request(options, url = nil, type = 'quote')
+    options[:EShipper][:username] ||= EShipperRuby.configuration.username
+    raise EShipperRubyError, "No username specified." unless options[:EShipper][:username]
+
+    options[:EShipper][:password] ||= EShipperRuby.configuration.password
+    raise EShipperRubyError, "No password specified." unless options[:EShipper][:password]
+
+    url ||= EShipperRuby.configuration.server_url || 'http://test.eshipper.com/eshipper/rpc2'
+
+    request = send("build_#{type}_request_body", options)
+
+    puts url
+    puts request
+
+    response = post(url, request)
+
+    puts response
+
+    return XmlSimple.xml_in(response.body)
+  end
+
   def self.quote_request(options, url = 'http://test.eshipper.com/eshipper/rpc2')
+    options[:EShipper][:username] ||= EShipperRuby.configuration.username
+    raise EShipperRubyError, "No username specified." unless options[:EShipper][:username]
+
+    options[:EShipper][:password] ||= EShipperRuby.configuration.password
+    raise EShipperRubyError, "No password specified." unless options[:EShipper][:password]
+
     request = build_quote_request_body(options)
     puts url
     puts request
