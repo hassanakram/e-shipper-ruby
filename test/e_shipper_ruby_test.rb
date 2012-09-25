@@ -45,21 +45,21 @@ class EShipperRubyTest  < Test::Unit::TestCase
     assert_include response["QuoteReply"][0]["Quote"], "Surcharge"
   end
 
-#  def test_shipping_request
-#    reference1 = EShipper::Reference.new(:name => "Vitamonthly", :code => "123")
-#    reference2 = EShipper::Reference.new(:name => "Heroku", :code => "456")
-#    references = [reference1, reference2]
+  def test_shipping_request
+    reference1 = EShipper::Reference.new(:name => "Vitamonthly", :code => "123")
+    reference2 = EShipper::Reference.new(:name => "Heroku", :code => "456")
+    references = [reference1, reference2]
 
-#    @options[:References] = references
-#    @options[:Payment] = {:type => "3rd Party"}
+    @options[:References] = references
+    @options[:Payment] = {:type => "3rd Party"}
 
-#    response = EShipper.shipping_request(@options)
+    response = EShipper.shipping_request(@options)
 
-#    assert response.include?("ShippingReply"), "ShippingReply not included"
-#    assert_include response["ShippingReply"], "Order"
-#    assert_include response["ShippingReply"], "Package"
-#    assert_include response["ShippingReply"], "TrackingURL"
-#    assert_include response["ShippingReply"], "Quote"
-#    assert_include response["ShippingReply"][0]["Quote"], "Surcharge"
-#  end
+    assert response.include?("ShippingReply"), "ShippingReply not included"
+    assert_include response["ShippingReply"], "Order"
+    assert_include response["ShippingReply"], "Package"
+    assert_include response["ShippingReply"], "TrackingURL"
+    assert_include response["ShippingReply"], "Quote"
+    assert_include response["ShippingReply"][0]["Quote"], "Surcharge"
+  end
 end
