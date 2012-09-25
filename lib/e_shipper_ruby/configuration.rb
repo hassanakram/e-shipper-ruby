@@ -24,8 +24,8 @@ module EShipperRuby
                   :password
 
     def initialize
-      @username   = ENV['ESHIPPER_USERNAME']
-      @password   = ENV['ESHIPPER_PASSWORD']
+      @username = ENV['ESHIPPER_USERNAME']
+      @password = ENV['ESHIPPER_PASSWORD']
     end
   end
 end
