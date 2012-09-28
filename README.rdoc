@@ -7,10 +7,6 @@ If you don't use bundler, install it by hand:
 
     gem install e_shipper_ruby
 
-=Documentation
-
-Reference documentation is not yet available at rubydoc.info
-
 =Source
 
 Source is available at github[https://github.com/HealthyWeb/e-shipper-ruby]
@@ -86,13 +82,11 @@ Then, when you create your client like:
 it will use the configuration information that you set with <tt>heroku config:add</tt>.
 
 === Connect to the e-shipper production API
-Specify the <tt>:usl</tt> option when creating your Client, e.g,
+Specify the <tt>:url</tt> option when creating your Client, e.g,
 
     EShipper::Client.new :url => "http://www.eshipper.com/rpc2", ...
 
 When you using Rails, the url defaults to the test server unless you are running in production, in which case it will automatically defaults to the production server. So this url option is not required.
-
-See the documentation[] for full details.
 
 = License
 
