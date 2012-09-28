@@ -24,25 +24,21 @@ class EShipperRubyTest  < Test::Unit::TestCase
 
     packages = [package1, package2]
 
-    @options = {:EShipper => {:username=>"vitamonthly", :password => "1234", :version => "3.0.0"},
+    @options = {:EShipper => {:version => "3.0.0"},
       :QuoteRequest => {:insuranceType=>"Carrier"},
       :From => from, :To => to,
       :Packages => {:type=>"Package"}, :PackagesList => packages,
       :Pickup => pickup}
-  end
 
-  def assert_include(container, include_child)
-    container.each do |element|
-      assert element.include?(include_child), "#{include_child} not included"
-    end
+    @client = EShipper::Client.new(:username => "vitamonthly", :password => "1234")
   end
 
   def test_quote_request
-    response = EShipper.quote_request(@options)
+    response = @client.send_request(@options)
 
-#    assert response.include?("QuoteReply"), "QuoteReply not included"
-#    assert_include response["QuoteReply"], "Quote"
-#    assert_include response["QuoteReply"][0]["Quote"], "Surcharge"
+    assert response.xpath('//xmlns:QuoteReply'), "QuoteReply not included"
+    assert response.xpath('//xmlns:Quote'), "Quote not included"
+    assert response.xpath('//xmlns:Surcharge'), "Surchage not included"
   end
 
   def test_shipping_request
@@ -53,17 +49,13 @@ class EShipperRubyTest  < Test::Unit::TestCase
     @options[:References] = references
     @options[:Payment] = {:type => "3rd Party"}
 
-    response = EShipper.shipping_request(@options)
+    response = @client.send_request(@options, 'shipping')
 
-    puts response
-
-    assert response.at('')
-
-#    assert response.include?("ShippingReply"), "ShippingReply not included"
-#    assert_include response["ShippingReply"], "Order"
-#    assert_include response["ShippingReply"], "Package"
-#    assert_include response["ShippingReply"], "TrackingURL"
-#    assert_include response["ShippingReply"], "Quote"
-#    assert_include response["ShippingReply"][0]["Quote"], "Surcharge"
+    assert response.xpath('//xmlns:ShippingReply'), "QuoteReply not included"
+    assert response.xpath('//xmlns:Order'), "Quote not included"
+    assert response.xpath('//xmlns:Package'), "Surchage not included"
+    assert response.xpath('//xmlns:TrackingURL'), "QuoteReply not included"
+    assert response.xpath('//xmlns:Quote'), "Quote not included"
+    assert response.xpath('//xmlns:Surcharge'), "Surchage not included"
   end
 end

@@ -1,122 +1,119 @@
 require 'net/http'
 require 'builder'
 require 'nokogiri'
-require 'e_shipper_ruby/classes/open_struct'
-require 'e_shipper_ruby/classes/address'
-require 'e_shipper_ruby/classes/package'
-require 'e_shipper_ruby/classes/pickup'
-require 'e_shipper_ruby/classes/reference'
 
 module EShipper
+  class Client
+    attr_accessor :username, :password, :url
 
-  def self.send_request(options, url = nil, type = 'quote')
-    options[:EShipper][:username] ||= EShipperRuby.configuration.username
-    raise EShipperRubyError, "No username specified." unless options[:EShipper][:username]
-
-    options[:EShipper][:password] ||= EShipperRuby.configuration.password
-    raise EShipperRubyError, "No password specified." unless options[:EShipper][:password]
-
-    url = 'http://test.eshipper.com/eshipper/rpc2'
-    if defined?(Rails.env)
-      url = 'http://www.eshipper.com/rpc2' if Rails.env == 'production'
-    end
-
-    request = send("build_#{type}_request_body", options)
-
-    puts url
-    puts request
-
-    response = post(url, request)
-
-    return Nokogiri::XML.parse(response.body)
-  end
-
-  def self.quote_request(options, url = 'http://test.eshipper.com/eshipper/rpc2')
-    options[:EShipper][:username] ||= EShipperRuby.configuration.username
-    raise EShipperRubyError, "No username specified." unless options[:EShipper][:username]
-
-    options[:EShipper][:password] ||= EShipperRuby.configuration.password
-    raise EShipperRubyError, "No password specified." unless options[:EShipper][:password]
-
-    request = build_quote_request_body(options)
-    puts url
-    puts request
-    response = post(url, request)
-    puts response.body
-    return Nokogiri::XML.parse(response.body)
-  end
-
-  def self.build_quote_request_body(options)
-    request = Builder::XmlMarkup.new(:indent=>2)
-    request.instruct!
-    request.EShipper(options[:EShipper], :xmlns=>"http://www.eshipper.net/XMLSchema") do |eshipper|
-      eshipper.QuoteRequest(options[:QuoteRequest]) do |quote|
-        quote.From(options[:From].attributes)
-        quote.To(options[:To].attributes)
-        if options[:COD] then quote.COD(options[:COD]) do |cod|
-            cod.CODReturnAddress(options[:CODReturnAddress])
-          end
-        end
-        quote.Packages(options[:Packages]) do |packs|
-          options[:PackagesList].each do |package|
-            packs.Package(package.attributes)
-          end
-        end
-        if options[:Pickup] then quote.Pickup(options[:Pickup].attributes) end
+    # Returns a new EShipper Client object. _options_ can be one of the following
+    #
+    # * A String containing the name of a YAML file formatted like:
+    # ---
+    # username: <your_e_shipper_username>
+    # password: <your_e_shipper_password>
+    # url: <http://test.eshipper.com/eshipper/rpc2|http://www.eshipper.com/rpc2>
+    #
+    # If the environment variables E_SHIPPER_USERNAME, E_SHIPPER_PASSWORD and/or E_SHIPPER_URL
+    # are present, they override any other values provided
+    def initialize(options = {})
+      if options.is_a?(String)
+        @options = YAML.load_file(options)
+      else
+        @options = options
       end
-    end
-  end
+      @options.symbolize_keys!
 
-  def self.shipping_request(options, url = 'http://test.eshipper.com/eshipper/rpc2')
-    request = build_shipping_request_body(options)
-    puts url
-    puts request
-    response = post(url, request)
-    puts response.body
-    return Nokogiri::XML.parse(response.body)
-  end
+      self.username = ENV['E_SHIPPER_USERNAME'] || @options[:username]
+      self.password = ENV['E_SHIPPER_PASSWORD'] || @options[:password]
+      self.url      = ENV['E_SHIPPER_URL']      || @options[:url]
 
-  def self.build_shipping_request_body(options)
-    request = Builder::XmlMarkup.new(:indent=>2)
-    request.instruct!
-    request.EShipper(options[:EShipper], :xmlns=>"http://www.eshipper.net/XMLSchema") do |eshipper|
-      eshipper.ShippingRequest(options[:QuoteRequest]) do |shipping|
-        shipping.From(options[:From].attributes)
-        shipping.To(options[:To].attributes)
-        if options[:COD] then shipping.COD(options[:COD]) do |cod|
-            cod.CODReturnAddress(options[:CODReturnAddress])
-          end
-        end
-        shipping.Packages(options[:Packages]) do |packs|
-          options[:PackagesList].each do |package|
-            packs.Package(package.attributes)
-          end
-        end
-        if options[:Pickup] then shipping.Pickup(options[:Pickup].attributes) end
-        shipping.Payment(options[:Payment])
-        unless options[:References].empty? then options[:References].each do |reference|
-            shipping.Reference(reference.attributes)
-          end
-        end
-        if options[:CustomsInvoice] then shipping.CustomsInvoice(options[:CustomsInvoice]) do |invoice|
-            invoice.BillTo(options[:CustomsInvoice][:BillTo])
-            invoice.Contact(options[:CustomsInvoice][:Contact])
-            invoice.Item(options[:CustomsInvoice][:Item])
-            if options[:DutiesTaxes] then invoice.DutiesTaxes(options[:CustomsInvoice][:DutiesTaxes]) end
-          end
+      raise EShipperRubyError, "No username specified." if self.username.nil? || self.username.empty?
+      raise EShipperRubyError, "No password specified." if self.password.nil? || self.password.empty?
+      if self.url.nil? || self.url.empty?
+        self.url = 'http://test.eshipper.com/eshipper/rpc2'
+        if defined?(Rails.env) && Rails.env == 'production'
+          self.url = 'http://www.eshipper.com/rpc2'
         end
       end
     end
-  end
 
-  def self.post(url, request_body)
-    uri = URI(url)
-    http_request = Net::HTTP::Post.new(uri.path)
+    def send_request(options, type = 'quote')
+      options[:EShipper][:username] = self.username
+      options[:EShipper][:password] = self.password
+      options.symbolize_keys!
 
-    http_request.body = request_body
+      request_body = send("build_#{type}_request_body", options)
 
-    http_response = Net::HTTP.start(uri.host, uri.port) do |http|
-      http.request(http_request)
+      puts self.url
+      puts request_body
+
+      uri = URI(self.url)
+      http_request = Net::HTTP::Post.new(uri.path)
+
+      http_request.body = request_body
+
+      http_response = Net::HTTP.start(uri.host, uri.port) do |http|
+        http.request(http_request)
+      end
+
+      puts http_response
+
+      return Nokogiri::XML(http_response.body)
+    end
+
+    def build_quote_request_body(options)
+      request = Builder::XmlMarkup.new(:indent=>2)
+      request.instruct!
+      request.EShipper(options[:EShipper], :xmlns=>"http://www.eshipper.net/XMLSchema") do |eshipper|
+        eshipper.QuoteRequest(options[:QuoteRequest]) do |quote|
+          quote.From(options[:From].attributes)
+          quote.To(options[:To].attributes)
+          if options[:COD] then quote.COD(options[:COD]) do |cod|
+              cod.CODReturnAddress(options[:CODReturnAddress])
+            end
+          end
+          quote.Packages(options[:Packages]) do |packs|
+            options[:PackagesList].each do |package|
+              packs.Package(package.attributes)
+            end
+          end
+          if options[:Pickup] then quote.Pickup(options[:Pickup].attributes) end
+        end
+      end
+    end
+
+    def build_shipping_request_body(options)
+      request = Builder::XmlMarkup.new(:indent=>2)
+      request.instruct!
+      request.EShipper(options[:EShipper], :xmlns=>"http://www.eshipper.net/XMLSchema") do |eshipper|
+        eshipper.ShippingRequest(options[:QuoteRequest]) do |shipping|
+          shipping.From(options[:From].attributes)
+          shipping.To(options[:To].attributes)
+          if options[:COD] then shipping.COD(options[:COD]) do |cod|
+              cod.CODReturnAddress(options[:CODReturnAddress])
+            end
+          end
+          shipping.Packages(options[:Packages]) do |packs|
+            options[:PackagesList].each do |package|
+              packs.Package(package.attributes)
+            end
+          end
+          if options[:Pickup] then shipping.Pickup(options[:Pickup].attributes) end
+          shipping.Payment(options[:Payment])
+          unless options[:References].empty? then options[:References].each do |reference|
+              shipping.Reference(reference.attributes)
+            end
+          end
+          if options[:CustomsInvoice] then shipping.CustomsInvoice(options[:CustomsInvoice]) do |invoice|
+              invoice.BillTo(options[:CustomsInvoice][:BillTo])
+              invoice.Contact(options[:CustomsInvoice][:Contact])
+              invoice.Item(options[:CustomsInvoice][:Item])
+              if options[:DutiesTaxes] then invoice.DutiesTaxes(options[:CustomsInvoice][:DutiesTaxes]) end
+            end
+          end
+        end
+      end
     end
   end
 end
