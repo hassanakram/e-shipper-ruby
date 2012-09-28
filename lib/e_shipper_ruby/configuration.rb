@@ -15,8 +15,8 @@ module EShipperRuby
   # Setting the keys with this Configuration
   #
   # EShipperRuby.configure do |config|
-  # config.username = 'demo'
-  # config.password = 'demo'
+  #   config.username = 'demo'
+  #   config.password = 'demo'
   # end
   #
   class Configuration

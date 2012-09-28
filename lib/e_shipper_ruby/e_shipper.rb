@@ -1,6 +1,6 @@
 require 'net/http'
 require 'builder'
-require 'xmlsimple'
+require 'nokogiri'
 require 'e_shipper_ruby/classes/open_struct'
 require 'e_shipper_ruby/classes/address'
 require 'e_shipper_ruby/classes/package'
@@ -28,7 +28,7 @@ module EShipper
 
     response = post(url, request)
 
-    return XmlSimple.xml_in(response.body)
+    return Nokogiri::XML.parse(response.body)
   end
 
   def self.quote_request(options, url = 'http://test.eshipper.com/eshipper/rpc2')
@@ -43,7 +43,7 @@ module EShipper
     puts request
     response = post(url, request)
     puts response.body
-    return XmlSimple.xml_in(response.body)
+    return Nokogiri::XML.parse(response.body)
   end
 
   def self.build_quote_request_body(options)
@@ -73,7 +73,7 @@ module EShipper
     puts request
     response = post(url, request)
     puts response.body
-    return XmlSimple.xml_in(response.body)
+    return Nokogiri::XML.parse(response.body)
   end
 
   def self.build_shipping_request_body(options)
