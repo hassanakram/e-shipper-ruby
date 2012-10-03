@@ -17,19 +17,25 @@ module EShipper
     # If the environment variables E_SHIPPER_USERNAME, E_SHIPPER_PASSWORD and/or E_SHIPPER_URL
     # are present, they override any other values provided
     def initialize(options = {})
-      if options.is_a?(String)
-        @options = YAML.load_file(options)
+      @options = 
+      case options
+      when {} 
+        if defined?(Rails.env) 
+          rails_config_path = Rails.root.join('config', 'e_shipper.yml')
+          YAML.load_file(rails_config_path)[Rails.env] if File.exist?(rails_config_path)
+        end
+      when String
+        YAML.load_file(options) if File.exist?(options)
       else
-        @options = options
-      end
-      @options.symbolize_keys!
+        options
+      end.symbolize_keys!
 
       self.username = ENV['E_SHIPPER_USERNAME'] || @options[:username]
       self.password = ENV['E_SHIPPER_PASSWORD'] || @options[:password]
       self.url      = ENV['E_SHIPPER_URL']      || @options[:url]
 
-      raise EShipperRubyError, "No username specified." if self.username.nil? || self.username.empty?
-      raise EShipperRubyError, "No password specified." if self.password.nil? || self.password.empty?
+      raise 'No username specified.' if self.username.nil? || self.username.empty?
+      raise 'No password specified.' if self.password.nil? || self.password.empty?
       if self.url.nil? || self.url.empty?
         self.url = 'http://test.eshipper.com/eshipper/rpc2'
         if defined?(Rails.env) && Rails.env == 'production'
@@ -45,9 +51,6 @@ module EShipper
 
       request_body = send("build_#{type}_request_body", options)
 
-      puts self.url
-      puts request_body
-
       uri = URI(self.url)
       http_request = Net::HTTP::Post.new(uri.path)
 
@@ -57,9 +60,7 @@ module EShipper
         http.request(http_request)
       end
 
-      puts http_response
-
-      return Nokogiri::XML(http_response.body)
+      Nokogiri::XML(http_response.body)
     end
 
     def build_quote_request_body(options)
