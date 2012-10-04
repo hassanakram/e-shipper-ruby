@@ -4,7 +4,7 @@ require 'nokogiri'
 
 module EShipper
   class Client
-    attr_accessor :username, :password, :url
+    attr_accessor :username, :password, :url, :from, :to, :pickup, :packages, :references
 
     # Returns a new EShipper Client object. _options_ can be one of the following
     #
@@ -33,6 +33,8 @@ module EShipper
       self.username = ENV['E_SHIPPER_USERNAME'] || @options[:username]
       self.password = ENV['E_SHIPPER_PASSWORD'] || @options[:password]
       self.url      = ENV['E_SHIPPER_URL']      || @options[:url]
+      self.from = EShipper::Address.new @options[:from] if @options[:from]
+      self.packages, self.references = [], []
 
       raise 'No username specified.' if self.username.nil? || self.username.empty?
       raise 'No password specified.' if self.password.nil? || self.password.empty?
@@ -44,9 +46,31 @@ module EShipper
       end
     end
 
+    #TODO: complete data parsing
+    def parse_quotes options
+      result = []
+      xml_data = send_request options
+      xml_data.css('Quote').each do |quote|
+        data = { :service_id => quote.attributes['serviceId'].content, :service_name => quote.attributes['serviceName'].content }
+        result << EShipper::Quote.new(data)
+      end
+      result
+    end
+
+    def parse_shipping
+      send_request options, 'shipping'
+    end
+
+    private
+
     def send_request(options, type = 'quote')
       options[:EShipper][:username] = self.username
       options[:EShipper][:password] = self.password
+      options[:From] = self.from if self.from
+      options[:To] = self.to if self.to
+      options[:Pickup] = self.pickup if self.pickup
+      options[:PackagesList] = self.packages if self.packages
+      options[:References] = self.references if self.references
       options.symbolize_keys!
 
       request_body = send("build_#{type}_request_body", options)
