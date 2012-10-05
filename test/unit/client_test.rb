@@ -53,14 +53,65 @@ class ClientTest  < Test::Unit::TestCase
     client.stubs(:send_request).returns Nokogiri::XML(File.open(xml_path))
     
     result = client.parse_quotes({})
+    assert_equal 3, result.count
+    first_result = result[0]
+    assert first_result.is_a?(EShipper::Quote) 
+    assert_equal '2', first_result.carrier_id
+    assert_equal '4', first_result.service_id 
+    assert_equal 'Purolator Express', first_result.service_name
+
+    surcharges = first_result.surcharges
+    assert_equal 2, surcharges.count
+    surcharge = surcharges[0]
+    assert_equal 'null', surcharge.id
+    assert_equal 'Insurance', surcharge.name
+    assert_equal '0.9', surcharge.amount
+  end
+
+  def test_parse_quotes_returns_the_message_error_when_trap_e_shipper_error_message
+    client = EShipper::Client.new :username => 'name', :password => '1234'
+    xml_path = "#{File.dirname(__FILE__)}/../support/error.xml"
+    client.stubs(:send_request).returns Nokogiri::XML(File.open(xml_path))
+    
+    result = client.parse_quotes({})
+    assert_equal ['Required field: Name is missing.'], result
   end
   
+  # TODO: complete test
   def test_parse_shipping_returns_an_array_of_shippings
     client = EShipper::Client.new :username => 'name', :password => '1234'
     xml_path = "#{File.dirname(__FILE__)}/../support/shipping.xml"
     client.stubs(:send_request).returns Nokogiri::XML(File.open(xml_path))
     
     result = client.parse_shipping({})
+    assert result.is_a?(EShipper::ShippingReply)
+    assert_equal '2065293', result.order_id
+    assert_equal 'Purolator', result.carrier_name
+    assert_equal 'Purolator Express', result.service_name
+    assert_equal %w{329014716131 329014716149}, result.package_tracking_numbers
+    assert_equal 2, result.references.count
+    reference = result.references[0]
+    assert reference.is_a?(EShipper::Reference)
+    assert_equal 'Vitamonthly', reference.name
+    assert_equal '123', reference.code
+    quote = result.quote
+    assert quote.is_a?(EShipper::Quote)
+    assert_equal '4', quote.service_id
+    assert_equal 'Purolator Express', quote.service_name
+    surcharge = quote.surcharges[0]
+    assert surcharge.is_a?(EShipper::Surcharge)
+    assert_equal '1899668', surcharge.id
+    assert_equal 'Insurance', surcharge.name
+    assert_equal '6.3', surcharge.amount
+  end
+
+  def test_parse_shipping_returns_the_message_error_when_trap_e_shipper_error_message
+    client = EShipper::Client.new :username => 'name', :password => '1234'
+    xml_path = "#{File.dirname(__FILE__)}/../support/error.xml"
+    client.stubs(:send_request).returns Nokogiri::XML(File.open(xml_path))
+    
+    result = client.parse_shipping({})
+    assert_equal ['Required field: Name is missing.'], result
   end
   
   private

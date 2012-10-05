@@ -1,0 +1,6 @@
+<?xml version="1.0"?> 
+<EShipper xmlns="http://www.eshipper.net/xml/XMLSchema" version="3.0.0"> 
+  <ErrorReply>
+  	<Error Message="Required field: Name is missing."/> 
+  </ErrorReply> 
+</EShipper>
