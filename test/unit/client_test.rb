@@ -74,7 +74,7 @@ class ClientTest  < Test::Unit::TestCase
     client.stubs(:send_request).returns Nokogiri::XML(File.open(xml_path))
     
     result = client.parse_quotes({})
-    assert_equal ['Required field: Name is missing.'], result
+    assert_equal({ :errors => ['Required field: Name is missing.'] }, result)
   end
   
   # TODO: complete test
@@ -111,7 +111,7 @@ class ClientTest  < Test::Unit::TestCase
     client.stubs(:send_request).returns Nokogiri::XML(File.open(xml_path))
     
     result = client.parse_shipping({})
-    assert_equal ['Required field: Name is missing.'], result
+    assert_equal({ :errors => ['Required field: Name is missing.'] }, result)
   end
   
   private

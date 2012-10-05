@@ -4,7 +4,8 @@ require 'nokogiri'
 
 module EShipper
   class Client
-    attr_accessor :username, :password, :url, :from, :to, :pickup, :packages, :references
+    attr_accessor :username, :password, :url, :from, :to, 
+                  :pickup, :packages, :references, :responses
 
     def initialize(options = {})
       @options = 
@@ -23,24 +24,25 @@ module EShipper
       self.username = ENV['E_SHIPPER_USERNAME'] || @options[:username]
       self.password = ENV['E_SHIPPER_PASSWORD'] || @options[:password]
       self.url      = ENV['E_SHIPPER_URL']      || @options[:url]
-      self.from = EShipper::Address.new @options[:from] if @options[:from]
-      self.packages, self.references = [], []
-
+      
       raise 'No username specified.' if self.username.nil? || self.username.empty?
       raise 'No password specified.' if self.password.nil? || self.password.empty?
       if self.url.nil? || self.url.empty?
         self.url = (defined?(Rails.env) && 'production' == Rails.env) ?
           'http://www.eshipper.com/rpc2' : 'http://test.eshipper.com/eshipper/rpc2'
       end
+
+      self.from = EShipper::Address.new @options[:from] if @options[:from]
+      self.packages, self.references, self.responses = [], [], []
     end
 
     def parse_quotes options
-      result, errors = [], []
+      result, errors = [], { :errors => [] }
       xml_data = send_request options
 
       xml_errors = xml_data.css('Error')
       xml_errors.each do |xml_error|
-        errors << xml_error.attributes['Message'].content
+        errors[:errors] << xml_error.attributes['Message'].content
       end
       return errors unless xml_errors.empty?
 
@@ -70,12 +72,12 @@ module EShipper
     end
 
     def parse_shipping options
-      errors = []
+      errors = { :errors => [] }
       xml_data = send_request options, 'shipping'
 
       xml_errors = xml_data.css('Error')
       xml_errors.each do |xml_error|
-        errors << xml_error.attributes['Message'].content
+        errors[:errors] << xml_error.attributes['Message'].content
       end
       return errors unless xml_errors.empty?
 
@@ -142,6 +144,7 @@ module EShipper
         http.request(http_request)
       end
 
+      self.responses << EShipper::Response.new(type, http_response.body)
       Nokogiri::XML(http_response.body)
     end
 
