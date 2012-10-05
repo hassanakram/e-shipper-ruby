@@ -6,16 +6,6 @@ module EShipper
   class Client
     attr_accessor :username, :password, :url, :from, :to, :pickup, :packages, :references
 
-    # Returns a new EShipper Client object. _options_ can be one of the following
-    #
-    # * A String containing the name of a YAML file formatted like:
-    # ---
-    # username: <your_e_shipper_username>
-    # password: <your_e_shipper_password>
-    # url: <http://test.eshipper.com/eshipper/rpc2|http://www.eshipper.com/rpc2>
-    #
-    # If the environment variables E_SHIPPER_USERNAME, E_SHIPPER_PASSWORD and/or E_SHIPPER_URL
-    # are present, they override any other values provided
     def initialize(options = {})
       @options = 
       case options
@@ -39,14 +29,12 @@ module EShipper
       raise 'No username specified.' if self.username.nil? || self.username.empty?
       raise 'No password specified.' if self.password.nil? || self.password.empty?
       if self.url.nil? || self.url.empty?
-        self.url = 'http://test.eshipper.com/eshipper/rpc2'
-        if defined?(Rails.env) && Rails.env == 'production'
-          self.url = 'http://www.eshipper.com/rpc2'
-        end
+        self.url = (defined?(Rails.env) && 'production' == Rails.env) ?
+          'http://www.eshipper.com/rpc2' : 'http://test.eshipper.com/eshipper/rpc2'
       end
     end
 
-    #TODO: complete data parsing
+    #TODO: complete data parsing  
     def parse_quotes options
       result = []
       xml_data = send_request options
@@ -57,8 +45,11 @@ module EShipper
       result
     end
 
-    def parse_shipping
-      send_request options, 'shipping'
+    #TODO: complete data parsing  
+    def parse_shipping options
+      result = []
+      xml_data = send_request options, 'shipping'
+      result
     end
 
     private
