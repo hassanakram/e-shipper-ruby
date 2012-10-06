@@ -1,10 +1,10 @@
 <?xml version="1.0"?> 
 <EShipper xmlns="http://www.eshipper.net/xml/XMLSchema" version="3.0.0"> 
   <QuoteReply> 
-  	 <Quote carrierId="2" carrierName="Purolator" serviceId="4" serviceName="Purolator Express" modeTransport="A" transitDays="1" currency="CAD" baseCharge="21.02" fuelSurcharge="1.27" totalCharge="26.21"> 
+  	 <Quote carrierId="2" carrierName="Purolator" serviceId="4" serviceName="Purolator Express" modeTransport="A" transitDays="1" currency="CAD" baseCharge="21.02" fuelSurcharge="1.27" totalCharge="61.13"> 
   	 	<Surcharge id="null" name="Insurance" amount="0.9"/> <Surcharge id="null" name="HST" amount="3.02"/> 
   	</Quote> 
-  	<Quote carrierId="2" carrierName="Purolator" serviceId="5" serviceName="Purolator Express 9AM" modeTransport="A" transitDays="1" currency="CAD" baseCharge="50.17" fuelSurcharge="3.02" totalCharge="61.13"> 
+  	<Quote carrierId="2" carrierName="Purolator" serviceId="5" serviceName="Purolator Express 9AM" modeTransport="A" transitDays="1" currency="CAD" baseCharge="50.17" fuelSurcharge="3.02" totalCharge="26.21"> 
   		<Surcharge id="null" name="Insurance" amount="0.9"/> <Surcharge id="null" name="HST" amount="7.04"/> 
     </Quote> 
     <Quote carrierId="2" carrierName="Purolator" serviceId="6" serviceName="Purolator Express 1030" modeTransport="A" transitDays="1" currency="CAD" baseCharge="40.2" fuelSurcharge="2.41" totalCharge="49.17"> 

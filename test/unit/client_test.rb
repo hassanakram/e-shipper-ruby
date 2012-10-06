@@ -47,27 +47,38 @@ class ClientTest  < Test::Unit::TestCase
     end
   end
   
-  def test_parse_quotes_returns_an_array_of_quotes
+  def test_parse_quotes_returns_sorted_quotes_by_increasing_total_charge
     client = EShipper::Client.new :username => 'name', :password => '1234'
     xml_path = "#{File.dirname(__FILE__)}/../support/quote.xml"
     client.stubs(:send_request).returns Nokogiri::XML(File.open(xml_path))
     
     result = client.parse_quotes({})
     assert_equal 3, result.count
+    assert result[0].is_a?(EShipper::Quote) 
+    assert_equal '26.21', result[0].total_charge
+    assert_equal '49.17', result[1].total_charge
+    assert_equal '61.13', result[2].total_charge
+  end
+  
+  def test_parse_quotes_returns_neted_e_shipper_objects
+    client = EShipper::Client.new :username => 'name', :password => '1234'
+    xml_path = "#{File.dirname(__FILE__)}/../support/quote.xml"
+    client.stubs(:send_request).returns Nokogiri::XML(File.open(xml_path))
+    
+    result = client.parse_quotes({})
     first_result = result[0]
-    assert first_result.is_a?(EShipper::Quote) 
     assert_equal '2', first_result.carrier_id
-    assert_equal '4', first_result.service_id 
-    assert_equal 'Purolator Express', first_result.service_name
+    assert_equal '5', first_result.service_id 
+    assert_equal 'Purolator Express 9AM', first_result.service_name
 
     surcharges = first_result.surcharges
     assert_equal 2, surcharges.count
-    surcharge = surcharges[0]
+    surcharge = surcharges[1]
     assert_equal 'null', surcharge.id
-    assert_equal 'Insurance', surcharge.name
-    assert_equal '0.9', surcharge.amount
+    assert_equal 'HST', surcharge.name
+    assert_equal '7.04', surcharge.amount
   end
-
+  
   def test_parse_quotes_returns_the_message_error_when_trap_e_shipper_error_message
     client = EShipper::Client.new :username => 'name', :password => '1234'
     xml_path = "#{File.dirname(__FILE__)}/../support/error.xml"
@@ -77,7 +88,6 @@ class ClientTest  < Test::Unit::TestCase
     assert_equal({ :errors => ['Required field: Name is missing.'] }, result)
   end
   
-  # TODO: complete test
   def test_parse_shipping_returns_an_array_of_shippings
     client = EShipper::Client.new :username => 'name', :password => '1234'
     xml_path = "#{File.dirname(__FILE__)}/../support/shipping.xml"
@@ -111,7 +121,7 @@ class ClientTest  < Test::Unit::TestCase
     client.stubs(:send_request).returns Nokogiri::XML(File.open(xml_path))
     
     result = client.parse_shipping({})
-    assert_equal({ :errors => ['Required field: Name is missing.'] }, result)
+    assert_equal({ :errors => ['Required field: Name is missing.', 'The e_shipper response is empty'] }, result)
   end
   
   private

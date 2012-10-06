@@ -4,6 +4,11 @@ require 'nokogiri'
 
 module EShipper
   class Client
+    COMMON_REQUEST_OPTIONS = {:EShipper => {:version => "3.0.0"},
+      :QuoteRequest => {:insuranceType=>"Carrier"},
+      :Packages => {:type=>"Package"}
+    }
+    
     attr_accessor :username, :password, :url, :from, :to, 
                   :pickup, :packages, :references, :responses
 
@@ -68,7 +73,7 @@ module EShipper
         end
         result << quote
       end
-      result
+      result.sort_by(&:total_charge)
     end
 
     def parse_shipping options
@@ -79,9 +84,11 @@ module EShipper
       xml_errors.each do |xml_error|
         errors[:errors] << xml_error.attributes['Message'].content
       end
-      return errors unless xml_errors.empty?
-
+      
       xml_data = xml_data.css('ShippingReply')
+      errors[:errors] << 'The e_shipper response is empty' if xml_data.empty?
+      return errors unless errors[:errors].empty?
+    
       data = { :order_id => xml_data.css('Order')[0]['id'], 
         :carrier_name => xml_data.css('Carrier')[0]['carrierName'], 
         :service_name => xml_data.css('Carrier')[0]['serviceName'], 
@@ -129,8 +136,8 @@ module EShipper
       options[:From] = self.from if self.from
       options[:To] = self.to if self.to
       options[:Pickup] = self.pickup if self.pickup
-      options[:PackagesList] = self.packages if self.packages
-      options[:References] = self.references if self.references
+      options[:PackagesList] = self.packages if(self.packages && !self.packages.empty?)
+      options[:References] = self.references if(self.references && !self.references.empty?)
       options.symbolize_keys!
 
       request_body = send("build_#{type}_request_body", options)
@@ -146,6 +153,8 @@ module EShipper
 
       self.responses << EShipper::Response.new(type, http_response.body)
       Nokogiri::XML(http_response.body)
+    rescue NoMethodError
+      raise "Verify that the mandatory data 'from', 'to', 'packages' are set on the client or in the request options"
     end
 
     def build_quote_request_body(options)
