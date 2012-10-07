@@ -9,6 +9,8 @@
     </Quote> 
     <Quote carrierId="2" carrierName="Purolator" serviceId="6" serviceName="Purolator Express 1030" modeTransport="A" transitDays="1" currency="CAD" baseCharge="40.2" fuelSurcharge="2.41" totalCharge="49.17"> 
       <Surcharge id="null" name="Insurance" amount="0.9"/> <Surcharge id="null" name="HST" amount="5.66"/> 
-    </Quote> 
+    </Quote>
+		<Quote carrierId="1" carrierName="Federal Express" serviceId="1" serviceName="Priority" modeTransport="null" transitDays="0" seCharge="46.27000045776367" fuelSurcharge="6.25" totalCharge="52.52" currency="CAD">
+	  </Quote>
   </QuoteReply> 
 </EShipper>

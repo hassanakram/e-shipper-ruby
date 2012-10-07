@@ -46,21 +46,22 @@ class ClientTest  < Test::Unit::TestCase
       client.references
     end
   end
-  
+    
   def test_parse_quotes_returns_sorted_quotes_by_increasing_total_charge
     client = EShipper::Client.new :username => 'name', :password => '1234'
     xml_path = "#{File.dirname(__FILE__)}/../support/quote.xml"
     client.stubs(:send_request).returns Nokogiri::XML(File.open(xml_path))
     
     result = client.parse_quotes({})
-    assert_equal 3, result.count
+    assert_equal 4, result.count
     assert result[0].is_a?(EShipper::Quote) 
     assert_equal '26.21', result[0].total_charge
     assert_equal '49.17', result[1].total_charge
-    assert_equal '61.13', result[2].total_charge
+    assert_equal '52.52', result[2].total_charge
+    assert_equal '61.13', result[3].total_charge
   end
   
-  def test_parse_quotes_returns_neted_e_shipper_objects
+  def test_parse_quotes_returns_nested_e_shipper_objects
     client = EShipper::Client.new :username => 'name', :password => '1234'
     xml_path = "#{File.dirname(__FILE__)}/../support/quote.xml"
     client.stubs(:send_request).returns Nokogiri::XML(File.open(xml_path))
@@ -70,7 +71,7 @@ class ClientTest  < Test::Unit::TestCase
     assert_equal '2', first_result.carrier_id
     assert_equal '5', first_result.service_id 
     assert_equal 'Purolator Express 9AM', first_result.service_name
-
+  
     surcharges = first_result.surcharges
     assert_equal 2, surcharges.count
     surcharge = surcharges[1]
@@ -121,7 +122,7 @@ class ClientTest  < Test::Unit::TestCase
     client.stubs(:send_request).returns Nokogiri::XML(File.open(xml_path))
     
     result = client.parse_shipping({})
-    assert_equal({ :errors => ['Required field: Name is missing.', 'The e_shipper response is empty'] }, result)
+    assert_equal({ :errors => ['Required field: Name is missing.'] }, result)
   end
   
   private

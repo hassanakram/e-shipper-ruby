@@ -8,7 +8,9 @@
     <Package trackingNumber="329014716131" />
     <Package trackingNumber="329014716149" />
     <TrackingURL><![CDATA[http://shipnow.purolator.com/shiponline/track/purolatortrack.asp?pinno=329014716131,329014716149,]]></TrackingURL>
-    <Pickup errorMessage="Pick up could not be scheduled"/>
+    <Labels>[base-64 encoded String]</Labels>
+    <CustomsInvoice>[base-64 encoded String]</CustomsInvoice>
+		<Pickup errorMessage="Pick up could not be scheduled" confirmationNumber ="123456789"/>
     <Quote carrierId="2" carrierName="Purolator" serviceId="4" serviceName="Purolator Express" modeTransport="A" transitDays="1" currency="CAD" baseCharge="25.84" fuelSurcharge="1.56" totalCharge="38.09">
       <Surcharge id="1899668" name="Insurance" amount="6.3" />
       <Surcharge id="1899669" name="HST" amount="4.39" />

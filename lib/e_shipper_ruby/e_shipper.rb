@@ -4,6 +4,8 @@ require 'nokogiri'
 
 module EShipper
   class Client
+    include EShipper::ParsingHelpers
+    
     COMMON_REQUEST_OPTIONS = {:EShipper => {:version => "3.0.0"},
       :QuoteRequest => {:insuranceType=>"Carrier"},
       :Packages => {:type=>"Package"}
@@ -42,94 +44,86 @@ module EShipper
     end
 
     def parse_quotes options
-      result, errors = [], { :errors => [] }
+      result = []
       xml_data = send_request options
 
-      xml_errors = xml_data.css('Error')
-      xml_errors.each do |xml_error|
-        errors[:errors] << xml_error.attributes['Message'].content
-      end
-      return errors unless xml_errors.empty?
-
-      xml_data.css('Quote').each do |xml_quote|
-        data = { :carrier_id => xml_quote.attributes['carrierId'].content,
-          :carrier_name => xml_quote.attributes['carrierName'].content,
-          :service_id => xml_quote.attributes['serviceId'].content, 
-          :service_name => xml_quote.attributes['serviceName'].content,
-          :transport_mode => xml_quote.attributes['serviceName'].content,
-          :transit_days => xml_quote.attributes['transitDays'].content,
-          :currency => xml_quote.attributes['currency'].content,
-          :base_charge => xml_quote.attributes['baseCharge'].content,
-          :fuel_surcharge => xml_quote.attributes['fuelSurcharge'].content,
-          :total_charge => xml_quote.attributes['totalCharge'].content
-        }
-        quote = EShipper::Quote.new(data)
-        xml_quote.css('Surcharge').each do |xml_surcharge|
-          data = { :id => xml_surcharge.attributes['id'].content, 
-            :name => xml_surcharge.attributes['name'].content,
-            :amount => xml_surcharge.attributes['amount'].content
-          }
-          quote.surcharges << EShipper::Surcharge.new(data) 
+      errors = error_messages xml_data
+      return errors unless errors[:errors].empty?
+     
+      quotes = xml_data.css('Quote')
+      unless quotes.empty?
+        quotes.each do |xml_quote|
+          keys = [:carrier_id, :carrier_name, :service_id, :service_name,
+           :transport_mode, :transit_days, :currency, :base_charge,
+           :fuel_surcharge, :total_charge
+          ]
+          quote = EShipper::Quote.new(data(xml_quote, keys))
+          surcharges = xml_quote.css('Surcharge')
+          unless surcharges.empty?
+            surcharges.each do |xml_surcharge|
+              keys = [:id, :name, :amount]
+              quote.surcharges << EShipper::Surcharge.new(data(xml_surcharge, keys))
+            end
+          end
+          result << quote
         end
-        result << quote
-      end
+      end      
       result.sort_by(&:total_charge)
     end
 
     def parse_shipping options
-      errors = { :errors => [] }
+      shipping_reply = nil
       xml_data = send_request options, 'shipping'
 
-      xml_errors = xml_data.css('Error')
-      xml_errors.each do |xml_error|
-        errors[:errors] << xml_error.attributes['Message'].content
-      end
-      
-      xml_data = xml_data.css('ShippingReply')
-      errors[:errors] << 'The e_shipper response is empty' if xml_data.empty?
+      errors = error_messages xml_data
       return errors unless errors[:errors].empty?
-    
-      data = { :order_id => xml_data.css('Order')[0]['id'], 
-        :carrier_name => xml_data.css('Carrier')[0]['carrierName'], 
-        :service_name => xml_data.css('Carrier')[0]['serviceName'], 
-        :tracking_url => xml_data.css('TrackingURL')[0].content, 
-        :pickup_message => xml_data.css('Pickup')[0]['errorMessage']
-      }
-      shipping_reply = EShipper::ShippingReply.new(data)
-      xml_data.css('Package').each do |xml_package|
-        shipping_reply.package_tracking_numbers << xml_package.attributes['trackingNumber'].content
-      end
-      xml_data.css('Reference').each do |xml_reference|
-        data = { :name => xml_reference.attributes['name'].content, :code => xml_reference.attributes['code'].content }
-        reference = EShipper::Reference.new(data)
-        shipping_reply.references << reference
-      end
-      xml_quote = xml_data.css('Quote')[0]
-      data = {:carrier_id => xml_quote['carrierId'],
-        :carrier_name => xml_quote['carrierName'],
-        :service_id => xml_quote['serviceId'], 
-        :service_name => xml_quote['serviceName'],
-        :transport_mode => xml_quote['serviceName'],
-        :transit_days => xml_quote['transitDays'],
-        :currency => xml_quote['currency'],
-        :base_charge => xml_quote['baseCharge'],
-        :fuel_surcharge => xml_quote['fuelSurcharge'],
-        :total_charge => xml_quote['totalCharge']
-      }
-      quote = EShipper::Quote.new(data)
-      xml_quote.css('Surcharge').each do |xml_surcharge|
-        data = { :id => xml_surcharge.attributes['id'].content, 
-          :name => xml_surcharge.attributes['name'].content,
-          :amount => xml_surcharge.attributes['amount'].content
+      
+      shipping_replies = xml_data.css('ShippingReply')
+      unless shipping_replies.empty?
+        data = { :order_id => try_direct_extract(xml_data, 'Order', 'id'), 
+          :carrier_name => try_direct_extract(xml_data, 'Carrier', 'carrierName'), 
+          :service_name => try_direct_extract(xml_data, 'Carrier', 'serviceName'), 
+          :tracking_url => try_direct_extract(xml_data, 'TrackingURL'), 
+          :pickup_message => try_direct_extract(xml_data, 'Pickup', 'errorMessage')
         }
-        quote.surcharges << EShipper::Surcharge.new(data) 
+        shipping_reply = EShipper::ShippingReply.new(data)
+        
+        packages = xml_data.css('Package')
+        unless packages.empty?
+          packages.each do |xml_package|
+           shipping_reply.package_tracking_numbers << try_extract(xml_package, 'trackingNumber')
+          end
+        end
+        
+        references = xml_data.css('Reference')
+        unless references.empty?
+          references.each do |xml_reference|
+            keys = [:name, :code]
+            shipping_reply.references << EShipper::Reference.new(data(xml_reference, keys))
+          end
+        end
+       
+        xml_quote = xml_data.css('Quote')[0]
+        keys = [:carrier_id, :carrier_name, :service_id, :service_name,
+          :transport_mode, :transit_days, :currency, :base_charge,
+          :fuel_surcharge, :total_charge
+        ]
+        quote = EShipper::Quote.new(data(xml_quote, keys))
+         
+        surcharges = xml_quote.css('Surcharge')
+        unless surcharges.empty?
+          surcharges.each do |xml_surcharge|
+            keys = [:id, :name, :amount]
+            quote.surcharges << EShipper::Surcharge.new(data(xml_surcharge, keys))
+          end
+        end
+        shipping_reply.quote = quote
       end
-      shipping_reply.quote = quote
       shipping_reply
     end
 
     private
-
+    
     def send_request(options, type = 'quote')
       options[:EShipper][:username] = self.username
       options[:EShipper][:password] = self.password
@@ -144,7 +138,6 @@ module EShipper
 
       uri = URI(self.url)
       http_request = Net::HTTP::Post.new(uri.path)
-
       http_request.body = request_body
 
       http_response = Net::HTTP.start(uri.host, uri.port) do |http|
@@ -157,6 +150,7 @@ module EShipper
       raise "Verify that the mandatory data 'from', 'to', 'packages' are set on the client or in the request options"
     end
 
+    #NOTE: requests generetors
     def build_quote_request_body(options)
       request = Builder::XmlMarkup.new(:indent=>2)
       request.instruct!
