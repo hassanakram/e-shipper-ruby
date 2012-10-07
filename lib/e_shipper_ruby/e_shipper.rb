@@ -47,9 +47,9 @@ module EShipper
       result = []
       xml_data = send_request options
 
-      errors = error_messages xml_data
+      errors = error_messages(xml_data)
       return errors unless errors[:errors].empty?
-     
+ 
       quotes = xml_data.css('Quote')
       unless quotes.empty?
         quotes.each do |xml_quote|
@@ -143,7 +143,7 @@ module EShipper
       http_response = Net::HTTP.start(uri.host, uri.port) do |http|
         http.request(http_request)
       end
-
+ 
       self.responses << EShipper::Response.new(type, http_response.body)
       Nokogiri::XML(http_response.body)
     rescue NoMethodError

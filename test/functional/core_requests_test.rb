@@ -35,14 +35,13 @@ class EShipperRubyTest  < Test::Unit::TestCase
   def test_private_quote_request_is_parsable
     response = @client.send :send_request, @options
     assert_not_nil response
-    assert_not_nil @client.responses[0].xml
+    assert  !@client.responses[0].xml.empty?, 'Problem with EShipper server' 
 
     assert !response.xpath('//xmlns:QuoteReply').empty?, "QuoteReply not included"
     assert !response.xpath('//xmlns:Quote').empty?, "Quote not included"
     assert !response.xpath('//xmlns:Surcharge').empty?, "Surchage not included"
   end
   
-
   def test_private_shipping_request_with_options
     reference1 = EShipper::Reference.new(:name => "Vitamonthly", :code => "123")
     reference2 = EShipper::Reference.new(:name => "Heroku", :code => "456")
@@ -53,7 +52,7 @@ class EShipperRubyTest  < Test::Unit::TestCase
    
     response = @client.send :send_request, @options, 'shipping'
     assert_not_nil response
-    assert_not_nil @client.responses[0].xml
+    assert  !@client.responses[0].xml.empty?, 'Problem with EShipper server' 
    
     assert response.xpath('//xmlns:ShippingReply'), "QuoteReply not included"
     assert response.xpath('//xmlns:Order'), "Quote not included"

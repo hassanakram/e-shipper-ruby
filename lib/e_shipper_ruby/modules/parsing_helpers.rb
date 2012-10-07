@@ -2,6 +2,7 @@ module EShipper
   module ParsingHelpers
     def error_messages(xml_data)
       errors = { :errors => [] }
+      errors[:errors] << "E_shipper response is empty" if(self.responses.first.xml.empty?)
       xml_errors = xml_data.css('Error')
       unless xml_errors.empty?
         xml_errors.each do |xml_error|
