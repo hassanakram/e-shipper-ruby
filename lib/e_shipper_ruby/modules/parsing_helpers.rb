@@ -2,7 +2,10 @@ module EShipper
   module ParsingHelpers
     def error_messages(xml_data)
       errors = { :errors => [] }
-      errors[:errors] << "E_shipper response is empty" if(self.responses.first.xml.empty?)
+      if self.respond_to?(:responses)
+         errors[:errors] << "E_shipper response is empty" if(self.responses.first && self.responses.first.xml.empty?)
+      end
+     
       xml_errors = xml_data.css('Error')
       unless xml_errors.empty?
         xml_errors.each do |xml_error|
@@ -11,7 +14,6 @@ module EShipper
       end
       errors
     end
-    
     def try_extract(xml_node, value)
       value = value.to_s.camel_case
       xml_node.attributes[value].content

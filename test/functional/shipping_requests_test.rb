@@ -37,16 +37,18 @@ class ShippingRequestsTest  < Test::Unit::TestCase
     response = @client.parse_shipping @options
     assert !response[:errors]
     assert response.is_a?(EShipper::ShippingReply)
-    assert_equal 'Purolator Ground 9AM', response.service_name
-    assert_equal response.package_tracking_numbers.include?("329014717014")
-    assert_equal response.package_tracking_numbers.include?("329014717022")
+    assert !response.tracking_url.empty?
+    assert !response.service_name.empty?
+    assert !response.package_tracking_numbers.empty?
   end
   
   def test_parse_shipping_e_shipper_with_service_id
-    @options[:QuoteRequest] = {:serviceId => '4'}
+    @options[:QuoteRequest].merge!({:serviceId => '4'})
     response = @client.parse_shipping @options
     assert !response[:errors]
-    assert_equal 'Purolator Ground 9AM', response.service_name
-    #NOTE: we test that the price is not the cheaper one
+    assert_equal 'Purolator Express', response.service_name
+    assert !response.tracking_url.empty?
+    assert !response.service_name.empty?
+    assert !response.package_tracking_numbers.empty?
   end
 end
