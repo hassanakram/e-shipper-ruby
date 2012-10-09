@@ -34,6 +34,7 @@ class ShippingRequestsTest  < Test::Unit::TestCase
   end
 
   def test_parse_shipping_e_shipper_without_service_id
+    p @client
     response = @client.parse_shipping @options
     assert !response[:errors]
     assert response.is_a?(EShipper::ShippingReply)

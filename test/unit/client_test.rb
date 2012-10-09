@@ -80,13 +80,13 @@ class ClientTest  < Test::Unit::TestCase
     assert_equal '7.04', surcharge.amount
   end
   
-  def test_parse_quotes_returns_the_message_error_when_trap_e_shipper_error_message
+  def test_parse_quotes_returns_an_empty_array_and_trap_e_shipper_error_message
     client = EShipper::Client.new :username => 'name', :password => '1234'
     xml_path = "#{File.dirname(__FILE__)}/../support/error.xml"
     client.stubs(:send_request).returns Nokogiri::XML(File.open(xml_path))
     
     result = client.parse_quotes({})
-    assert_equal({ :errors => ['Required field: Name is missing.'] }, result)
+    assert result.empty?
   end
   
   def test_parse_shipping_returns_an_array_of_shippings
@@ -116,15 +116,31 @@ class ClientTest  < Test::Unit::TestCase
     assert_equal '6.3', surcharge.amount
   end
 
-  def test_parse_shipping_returns_the_message_error_when_trap_e_shipper_error_message
+  def test_parse_shipping_returns_nil_and_trap_e_shipper_error_message
     client = EShipper::Client.new :username => 'name', :password => '1234'
     xml_path = "#{File.dirname(__FILE__)}/../support/error.xml"
     client.stubs(:send_request).returns Nokogiri::XML(File.open(xml_path))
     
-    result = client.parse_shipping({})
-    assert_equal({ :errors => ['Required field: Name is missing.'] }, result)
+    assert !client.parse_shipping({})
   end
   
+  def test_validate_last_response_returns_false_if_last_response_contains_errors
+    client = EShipper::Client.new :username => 'name', :password => '1234'
+    response = EShipper::Response.new('quote', '')
+    response.errors = ['Java Error: out of memory'] 
+    client.responses << response
+    
+    assert !client.validate_last_response
+  end
+
+  def test_validate_last_response_returns_true_if_ast_response_contains_no_errors
+    client = EShipper::Client.new :username => 'name', :password => '1234'
+    response = EShipper::Response.new('quote', '')
+    client.responses << response
+    
+    assert client.validate_last_response
+  end
+
   private
   
   def set_env_rails_equal_production 

@@ -49,6 +49,6 @@ class QuotesRequestsTest  < Test::Unit::TestCase
     first_quote = response[0]
     assert first_quote, 'Problem with EShipper server'
     assert_equal '6', first_quote.service_id
-    assert_equal 'Purolator Ground 9AM', first_quote.service_name
+    assert_equal 'Purolator Express 1030', first_quote.service_name
   end
 end

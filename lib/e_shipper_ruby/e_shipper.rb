@@ -7,8 +7,8 @@ module EShipper
     include EShipper::ParsingHelpers
     
     COMMON_REQUEST_OPTIONS = {:EShipper => {:version => "3.0.0"},
-      :QuoteRequest => {:insuranceType=>"Carrier"},
-      :Packages => {:type=>"Package"}
+      :QuoteRequest => {:insuranceType => "Carrier"},
+      :Packages => {:type => "Package"}
     }
     
     attr_accessor :username, :password, :url, :from, :to, 
@@ -43,13 +43,12 @@ module EShipper
       self.packages, self.references, self.responses = [], [], []
     end
 
-    def parse_quotes options
+    def parse_quotes(options=COMMON_REQUEST_OPTIONS)
       result = []
       xml_data = send_request options
 
-      errors = error_messages(xml_data)
-      return errors unless errors[:errors].empty?
- 
+      error_messages xml_data
+      
       quotes = xml_data.css('Quote')
       unless quotes.empty?
         quotes.each do |xml_quote|
@@ -71,13 +70,12 @@ module EShipper
       result.sort_by(&:total_charge)
     end
 
-    def parse_shipping options
+    def parse_shipping(options=COMMON_REQUEST_OPTIONS)
       shipping_reply = nil
       xml_data = send_request options, 'shipping'
 
-      errors = error_messages xml_data
-      return errors unless errors[:errors].empty?
-      
+      error_messages xml_data
+   
       shipping_replies = xml_data.css('ShippingReply')
       unless shipping_replies.empty?
         data = { :order_id => try_direct_extract(xml_data, 'Order', 'id'), 
@@ -122,9 +120,35 @@ module EShipper
       shipping_reply
     end
 
+    def last_response
+      responses.last
+    end
+
+    def validate_last_response
+      last_response.errors.empty?
+    end
+
+    def prepare_request(from, to, pickup, packages, references)
+      self.from = EShipper::Address.new(from) if from
+      self.to = EShipper::Address.new(to) if to
+      self.pickup = EShipper::Pickup.new(pickup) if pickup
+
+      if packages  
+        packages.each do |package_data|
+          self.packages << EShipper::Package.new(package_data)
+        end
+      end
+ 
+      if references
+        references.each do |reference_data|
+          self.references << EShipper::Reference.new(reference_data)
+        end
+      end
+    end
+
     private
     
-    def send_request(options, type = 'quote')
+    def send_request(options, type='quote')
       options[:EShipper][:username] = self.username
       options[:EShipper][:password] = self.password
       options[:From] = self.from if self.from
@@ -150,7 +174,7 @@ module EShipper
       raise "Verify that the mandatory data 'from', 'to', 'packages' are set on the client or in the request options"
     end
 
-    #NOTE: requests generetors
+    #NOTE: requests generators
     def build_quote_request_body(options)
       request = Builder::XmlMarkup.new(:indent=>2)
       request.instruct!
@@ -171,7 +195,7 @@ module EShipper
         end
       end
     end
-
+ 
     def build_shipping_request_body(options)
       request = Builder::XmlMarkup.new(:indent=>2)
       request.instruct!

@@ -17,4 +17,8 @@ class ReferenceTest  < Test::Unit::TestCase
     reference2 = EShipper::Reference.new({:invalid => "invalid"})
     assert_raise(ArgumentError) { reference2.validate! }
   end
+
+  #TODO
+  def test_description
+  end
 end

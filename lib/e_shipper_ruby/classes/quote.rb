@@ -1,3 +1,5 @@
+require 'nokogiri'
+
 module EShipper
   class Quote < OpenStruct
     attr_accessor :surcharges
@@ -11,6 +13,17 @@ module EShipper
     def initialize(attributes = {})
     	@surcharges = []
     	super attributes
+    end
+
+    def description type='light'
+      rejected_attr = ('light' == type.to_s ? %w{carrier_id carrier_name service_id service_name} : [])
+      doc = Nokogiri::HTML::DocumentFragment.parse ""
+      Nokogiri::HTML::Builder.with(doc) do |doc|
+        self.attributes.each do |attr|
+          doc.p "#{attr[0]}: #{attr[1]}" unless rejected_attr.include?(attr[0]) || attr[1].empty?
+        end
+      end
+      doc.to_html
     end
   end
 end

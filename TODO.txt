@@ -1,1 +1,3 @@
 - rewrite the README file
+- Test new client methods: 'prepare_request'
+- Tester les fonctions de description pour les differentes classes de la gem
