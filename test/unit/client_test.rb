@@ -14,22 +14,12 @@ class ClientTest  < Test::Unit::TestCase
     assert_equal '1234', client.password
     assert_equal 'http://test.eshipper.com/eshipper/rpc2', client.url
   end
-  
-  def test_accessible_attributes_throw_singleton_instance
-    assert_nothing_raised do
-      client = EShipper::Client.instance
-      client.from
-      client.to
-      client.pickup
-      client.packages
-      client.references
-    end
-  end
     
   def test_parse_quotes_returns_sorted_quotes_by_increasing_total_charge
     client = EShipper::Client.instance
     xml_path = "#{File.dirname(__FILE__)}/../support/quote.xml"
-    client.stubs(:send_request).returns Nokogiri::XML(File.open(xml_path))
+    doc = Nokogiri::XML(File.open(xml_path))
+    Nokogiri.stubs(:XML).returns doc
     
     result = client.parse_quotes({})
     assert_equal 4, result.count
@@ -43,7 +33,8 @@ class ClientTest  < Test::Unit::TestCase
   def test_parse_quotes_returns_nested_e_shipper_objects
     client = EShipper::Client.instance
     xml_path = "#{File.dirname(__FILE__)}/../support/quote.xml"
-    client.stubs(:send_request).returns Nokogiri::XML(File.open(xml_path))
+    doc = Nokogiri::XML(File.open(xml_path))
+    Nokogiri.stubs(:XML).returns doc
     
     result = client.parse_quotes({})
     first_result = result[0]
@@ -62,16 +53,19 @@ class ClientTest  < Test::Unit::TestCase
   def test_parse_quotes_returns_an_empty_array_and_trap_e_shipper_error_message
     client = EShipper::Client.instance
     xml_path = "#{File.dirname(__FILE__)}/../support/error.xml"
-    client.stubs(:send_request).returns Nokogiri::XML(File.open(xml_path))
+    doc = Nokogiri::XML(File.open(xml_path))
+    Nokogiri.stubs(:XML).returns doc
     
     result = client.parse_quotes({})
     assert result.empty?
+    assert !client.last_response.errors.empty?
   end
   
   def test_parse_shipping_returns_an_array_of_shippings
     client = EShipper::Client.instance
     xml_path = "#{File.dirname(__FILE__)}/../support/shipping.xml"
-    client.stubs(:send_request).returns Nokogiri::XML(File.open(xml_path))
+    doc = Nokogiri::XML(File.open(xml_path))
+    Nokogiri.stubs(:XML).returns doc
     
     result = client.parse_shipping({})
     assert result.is_a?(EShipper::ShippingReply)
@@ -98,9 +92,12 @@ class ClientTest  < Test::Unit::TestCase
   def test_parse_shipping_returns_nil_and_trap_e_shipper_error_message
     client = EShipper::Client.instance
     xml_path = "#{File.dirname(__FILE__)}/../support/error.xml"
-    client.stubs(:send_request).returns Nokogiri::XML(File.open(xml_path))
+    doc = Nokogiri::XML(File.open(xml_path))
+    Nokogiri.stubs(:XML).returns doc
     
-    assert !client.parse_shipping({})
+    result = client.parse_shipping({})
+    assert !result
+    assert !client.last_response.errors.empty?
   end
   
   def test_last_response_returns_last_response
@@ -135,21 +132,4 @@ class ClientTest  < Test::Unit::TestCase
     
     assert client.validate_last_response
   end
-  
-  def test_prepare_request_run_validations
-    client = EShipper::Client.instance
-    from_data = {:id => '123', :company => 'new_company' }
-    assert_raises(ArgumentError) { client.prepare_request!(from_data) }
-  end
-  
-  def test_prepare_request_create_safety_client_attributes
-    client = EShipper::Client.instance
-    references_data = [{:name => 'Vitamonthly', :code => 'AAA'}]
-    options = [nil, nil, nil, nil, references_data]
-    
-    assert_nothing_raised { client.prepare_request!(*options) }
-    assert_equal 'Vitamonthly', client.references.first.name
-    assert_equal 'AAA', client.references.first.code
-  end
-
 end

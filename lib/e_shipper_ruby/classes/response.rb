@@ -4,7 +4,7 @@ module EShipper
     attr_accessor :errors
 
     def initialize(type, xml, time = Time.now)
-      @type = type
+      @type = type.to_s
       @xml = xml
       @time = time
       @errors = []

@@ -1,5 +1,3 @@
-require 'nokogiri'
-
 module EShipper
   class Quote < OpenStruct
     attr_accessor :surcharges

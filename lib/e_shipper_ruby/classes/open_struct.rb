@@ -23,6 +23,7 @@ module EShipper
       end
       self.class::REQUIRED_FIELDS.each do |k|
         raise ArgumentError, "#{k} is required for #{self.class.name} type" unless @attributes.has_key?(k.to_s)
+        raise ArgumentError, "#{k} cannot be nil for #{self.class.name} type" if @attributes[k.to_s].nil?
       end
       self
     end

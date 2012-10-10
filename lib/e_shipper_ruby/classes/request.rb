@@ -1,42 +1,47 @@
-require 'nokogiri'
-require 'builder'
-
 module EShipper
 	class Request
-		attr_accessor :from
-		attr_accessor :to
-		attr_accessor :pickup
-		attr_accessor :packages
+		attr_reader :from, :to, :pickup, :packages, :references, :service_id
 
-    COMMON_REQUEST_OPTIONS = {:EShipper => {:version => "3.0.0"},
+    COMMON_REQUEST_OPTIONS = {
       :QuoteRequest => {:insuranceType => "Carrier"},
-      :Packages => {:type => "Package"}
+      :ShippingRequest => {:insuranceType => "Carrier"},
+      :Packages => {:type => "Package"},
+      :Payment => {:type => "3rd Party"}
     }
 
-		def send_now options={}
-			options.merge! COMMON_REQUEST_OPTIONS
+    def initialize
+      @packages, @references = [], []
+    end
 
-      options[:From] = @from if @from
-      options[:To] = @to if @to
-      options[:Pickup] = @pickup if @pickup
-      options[:PackagesList] = @packages if(@packages && !@packages.empty?)
-      options[:References] = @references if(@references && !@references.empty?)
-      options.symbolize_keys!
+    def prepare!(data={}) 
+      @from = EShipper::Address.new(data[:from]).validate! if data[:from]
+      @to = EShipper::Address.new(data[:to]).validate! if data[:to]
+      @pickup = EShipper::Pickup.new(data[:pickup]).validate! if data[:pickup]
+      @service_id = data[:service_id] if data[:service_id]
 
-      request_body options
+      if packages = data[:packages] 
+        packages.each do |package_data|
+          @packages << EShipper::Package.new(package_data).validate!
+        end
+      end
+ 
+      if references = data[:references]
+        references.each do |reference_data|
+          @references << EShipper::Reference.new(reference_data).validate!
+        end
+      end
+    end
 
-      uri = URI(@url)
+		def send_now
+      uri = URI(EShipper::Client.instance.url)
       http_request = Net::HTTP::Post.new(uri.path)
       http_request.body = request_body
-
+     
       http_response = Net::HTTP.start(uri.host, uri.port) do |http|
         http.request(http_request)
       end
- 
-      @responses << EShipper::Response.new(type, http_response.body)
-      Nokogiri::XML(http_response.body)
-    rescue NoMethodError
-      raise "Verify that the mandatory data 'from', 'to', 'packages' are set on the client or in the request options"
-		end
+      
+      http_response.body 
+   	end
 	end
 end

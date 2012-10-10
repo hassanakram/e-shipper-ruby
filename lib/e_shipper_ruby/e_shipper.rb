@@ -1,5 +1,4 @@
 require 'net/http'
-require 'builder'
 require 'nokogiri'
 require 'singleton'
 
@@ -8,8 +7,7 @@ module EShipper
     include EShipper::ParsingHelpers
     include Singleton
     
-    attr_reader :username, :password, :url, :from, :to, 
-                :pickup, :packages, :references, :responses
+    attr_reader :username, :password, :url, :responses
 
     def initialize
       @options = 
@@ -22,7 +20,7 @@ module EShipper
       end
       @options.symbolize_keys!
 
-      @username, @password, @url = @options[:username], @options[:password], @options[:url]
+      @username, @password, @url, @responses = @options[:username], @options[:password], @options[:url], []
       
       raise 'No username specified.' if @username.nil? || @username.empty?
       raise 'No password specified.' if @password.nil? || @password.empty?
@@ -30,15 +28,17 @@ module EShipper
         @url = (defined?(Rails.env) && 'production' == Rails.env) ?
           'http://www.eshipper.com/rpc2' : 'http://test.eshipper.com/eshipper/rpc2'
       end
-
-      @from = EShipper::Address.new @options[:from] if @options[:from]
-      @packages, @references, @responses = [], [], []
     end
 
     def parse_quotes(options={})
       result = []
-      xml_data = EShipper::QuoteRequest.new.send_now(options)
+      request = EShipper::QuoteRequest.new
+      request.prepare! options
+      
+      response = request.send_now
+      @responses << EShipper::Response.new(:quote, response) 
 
+      xml_data = Nokogiri::XML(response)
       error_messages xml_data
       
       quotes = xml_data.css('Quote')
@@ -64,8 +64,13 @@ module EShipper
 
     def parse_shipping(options={})
       shipping_reply = nil
-      xml_data = EShipper::ShippingRequest.new.send_now(options)
 
+      request = EShipper::ShippingRequest.new
+      request.prepare! options
+      response = request.send_now
+      @responses << EShipper::Response.new(:shipping, response) 
+
+      xml_data = Nokogiri::XML(response)
       error_messages xml_data
    
       shipping_replies = xml_data.css('ShippingReply')
@@ -118,26 +123,6 @@ module EShipper
 
     def validate_last_response
       last_response.errors.empty? && (!last_response.xml.empty?)
-    end
-
-    def prepare_request!(*attrs_data) 
-      from, to, pickup, packages, references = attrs_data
-    
-      @from = EShipper::Address.new(from).validate! if from
-      @to = EShipper::Address.new(to).validate! if to
-      @pickup = EShipper::Pickup.new(pickup).validate! if pickup
-
-      if packages  
-        packages.each do |package_data|
-          @packages << EShipper::Package.new(package_data).validate!
-        end
-      end
- 
-      if references
-        references.each do |reference_data|
-          @references << EShipper::Reference.new(reference_data).validate!
-        end
-      end
     end
   end
 end

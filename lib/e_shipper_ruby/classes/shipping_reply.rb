@@ -1,5 +1,3 @@
-require 'nokogiri'
-
 module EShipper
   class ShippingReply < OpenStruct
   	attr_accessor :references, :package_tracking_numbers, :quote
