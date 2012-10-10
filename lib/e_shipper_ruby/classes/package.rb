@@ -10,9 +10,6 @@ module EShipper
       :description #Required if type="Pallet"
     ]
 
-    REQUIRED_FIELDS = [
-      :length, :width, :height, :weight, :insuranceAmount, :codAmount
-    ]
-
+    REQUIRED_FIELDS = [ :length, :width, :height, :weight ]
   end
 end

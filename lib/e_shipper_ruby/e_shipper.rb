@@ -28,19 +28,19 @@ module EShipper
         options
       end.symbolize_keys!
 
-      self.username = ENV['E_SHIPPER_USERNAME'] || @options[:username]
-      self.password = ENV['E_SHIPPER_PASSWORD'] || @options[:password]
-      self.url      = ENV['E_SHIPPER_URL']      || @options[:url]
+      @username = ENV['E_SHIPPER_USERNAME'] || @options[:username]
+      @password = ENV['E_SHIPPER_PASSWORD'] || @options[:password]
+      @url      = ENV['E_SHIPPER_URL']      || @options[:url]
       
-      raise 'No username specified.' if self.username.nil? || self.username.empty?
-      raise 'No password specified.' if self.password.nil? || self.password.empty?
-      if self.url.nil? || self.url.empty?
-        self.url = (defined?(Rails.env) && 'production' == Rails.env) ?
+      raise 'No username specified.' if @username.nil? || @username.empty?
+      raise 'No password specified.' if @password.nil? || @password.empty?
+      if @url.nil? || @url.empty?
+        @url = (defined?(Rails.env) && 'production' == Rails.env) ?
           'http://www.eshipper.com/rpc2' : 'http://test.eshipper.com/eshipper/rpc2'
       end
 
-      self.from = EShipper::Address.new @options[:from] if @options[:from]
-      self.packages, self.references, self.responses = [], [], []
+      @from = EShipper::Address.new @options[:from] if @options[:from]
+      @packages, @references, @responses = [], [], []
     end
 
     def parse_quotes(options=COMMON_REQUEST_OPTIONS)
@@ -128,20 +128,22 @@ module EShipper
       last_response.errors.empty?
     end
 
-    def prepare_request(from, to, pickup, packages, references)
-      self.from = EShipper::Address.new(from) if from
-      self.to = EShipper::Address.new(to) if to
-      self.pickup = EShipper::Pickup.new(pickup) if pickup
+    def prepare_request!(*attrs_data) 
+      from, to, pickup, packages, references = attrs_data
+      
+      @from = EShipper::Address.new(from).validate! if from
+      @to = EShipper::Address.new(to).validate! if to
+      @pickup = EShipper::Pickup.new(pickup).validate! if pickup
 
       if packages  
         packages.each do |package_data|
-          self.packages << EShipper::Package.new(package_data)
+          @packages << EShipper::Package.new(package_data).validate!
         end
       end
  
       if references
         references.each do |reference_data|
-          self.references << EShipper::Reference.new(reference_data)
+          @references << EShipper::Reference.new(reference_data).validate!
         end
       end
     end
@@ -149,18 +151,18 @@ module EShipper
     private
     
     def send_request(options, type='quote')
-      options[:EShipper][:username] = self.username
-      options[:EShipper][:password] = self.password
-      options[:From] = self.from if self.from
-      options[:To] = self.to if self.to
-      options[:Pickup] = self.pickup if self.pickup
-      options[:PackagesList] = self.packages if(self.packages && !self.packages.empty?)
-      options[:References] = self.references if(self.references && !self.references.empty?)
+      options[:EShipper][:username] = @username
+      options[:EShipper][:password] = @password
+      options[:From] = @from if @from
+      options[:To] = @to if @to
+      options[:Pickup] = @pickup if @pickup
+      options[:PackagesList] = @packages if(@packages && !@packages.empty?)
+      options[:References] = @references if(@references && !@references.empty?)
       options.symbolize_keys!
 
       request_body = send("build_#{type}_request_body", options)
 
-      uri = URI(self.url)
+      uri = URI(@url)
       http_request = Net::HTTP::Post.new(uri.path)
       http_request.body = request_body
 
@@ -168,7 +170,7 @@ module EShipper
         http.request(http_request)
       end
  
-      self.responses << EShipper::Response.new(type, http_response.body)
+      @responses << EShipper::Response.new(type, http_response.body)
       Nokogiri::XML(http_response.body)
     rescue NoMethodError
       raise "Verify that the mandatory data 'from', 'to', 'packages' are set on the client or in the request options"

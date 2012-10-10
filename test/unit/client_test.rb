@@ -124,6 +124,14 @@ class ClientTest  < Test::Unit::TestCase
     assert !client.parse_shipping({})
   end
   
+  def test_last_response_returns_last_response
+    client = EShipper::Client.new :username => 'name', :password => '1234'
+    response = EShipper::Response.new('quote', '')
+    client.responses << response
+    
+    assert_equal response, client.last_response
+  end
+  
   def test_validate_last_response_returns_false_if_last_response_contains_errors
     client = EShipper::Client.new :username => 'name', :password => '1234'
     response = EShipper::Response.new('quote', '')
@@ -133,14 +141,30 @@ class ClientTest  < Test::Unit::TestCase
     assert !client.validate_last_response
   end
 
-  def test_validate_last_response_returns_true_if_ast_response_contains_no_errors
+  def test_validate_last_response_returns_true_if_last_response_contains_no_errors
     client = EShipper::Client.new :username => 'name', :password => '1234'
     response = EShipper::Response.new('quote', '')
     client.responses << response
     
     assert client.validate_last_response
   end
-
+  
+  def test_prepare_request_run_validations
+    client = EShipper::Client.new :username => 'name', :password => '1234'
+    from_data = {:id => '123', :company => 'new_company' }
+    assert_raises(ArgumentError) { client.prepare_request!(from_data) }
+  end
+  
+  def test_prepare_request_create_safety_client_attributes
+    client = EShipper::Client.new :username => 'name', :password => '1234'
+    references_data = [{:name => 'Vitamonthly', :code => 'AAA'}]
+    options = [nil, nil, nil, nil, references_data]
+    
+    assert_nothing_raised { client.prepare_request!(*options) }
+    assert_equal 'Vitamonthly', client.references.first.name
+    assert_equal 'AAA', client.references.first.code
+  end
+  
   private
   
   def set_env_rails_equal_production 

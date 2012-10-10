@@ -24,7 +24,26 @@ module EShipper
       self.class::REQUIRED_FIELDS.each do |k|
         raise ArgumentError, "#{k} is required for #{self.class.name} type" unless @attributes.has_key?(k.to_s)
       end
-      return true
+      self
+    end
+    
+    def description
+      doc = Nokogiri::HTML::DocumentFragment.parse ""
+      Nokogiri::HTML::Builder.with(doc) do |doc|
+        doc.div(:class => "e_shipper_#{class_name.downcase}_description") do
+          doc.h2 "#{class_name} description"
+          doc.ul do
+            self.attributes.each do |attr|
+              doc.li "#{attr[0]}: #{attr[1]}" unless attr[1].empty?
+            end
+          end
+        end
+      end
+      doc.to_html
+    end
+    
+    def class_name
+      self.class.to_s.split('::').last
     end
   end
 end

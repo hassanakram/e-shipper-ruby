@@ -10,6 +10,5 @@ module EShipper
       :contactName, :phoneNumber, :pickupDate,
       :pickupTime, :closingTime
     ]
-
   end
 end

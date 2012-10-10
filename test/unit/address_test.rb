@@ -19,4 +19,14 @@ class AddressTest  < Test::Unit::TestCase
     address2 = EShipper::Address.new({:invalid => "invalid"})
     assert_raise(ArgumentError) { address2.validate! }
   end
+  
+  def test_description_render_html_of_the_address_content
+    address = EShipper::Address.new({:id => "123", :company => "Vitamonthly", :address1 => "650 CIT Drive", 
+      :city => "Livingston", :state => "ON", :zip => "L4J7Y9", :country => "CA"})
+
+    html = address.description
+    assert html.include?('123')
+    assert html.include?('Livingston')
+    assert html.include?('L4J7Y9')
+  end
 end

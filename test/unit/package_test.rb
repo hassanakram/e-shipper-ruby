@@ -18,4 +18,14 @@ class PackageTest  < Test::Unit::TestCase
     package2 = EShipper::Package.new({:invalid => "invalid"})
     assert_raise(ArgumentError) { package2.validate! }
   end
+  
+  def test_description_render_html_of_the_package_content
+    package = EShipper::Package.new({:length => "15", :width => "10", :height => "10", :weight => "5",
+      :insuranceAmount => "120", :codAmount => "120"})
+    
+    html = package.description
+    assert html.include?('15')
+    assert html.include?('10')
+    assert html.include?('120')
+  end
 end

@@ -11,16 +11,20 @@ module EShipper
     REQUIRED_FIELDS = []
 
     def initialize(attributes = {})
-    	@surcharges = []
-    	super attributes
+      @surcharges = []
+      super attributes
     end
 
     def description type='light'
       rejected_attr = ('light' == type.to_s ? %w{carrier_id carrier_name service_id service_name} : [])
       doc = Nokogiri::HTML::DocumentFragment.parse ""
       Nokogiri::HTML::Builder.with(doc) do |doc|
-        self.attributes.each do |attr|
-          doc.p "#{attr[0]}: #{attr[1]}" unless rejected_attr.include?(attr[0]) || attr[1].empty?
+        doc.div(:class => 'e_shipper_quote_description') do
+          doc.ul do
+            self.attributes.each do |attr|
+              doc.li "#{attr[0]}: #{attr[1]}" unless rejected_attr.include?(attr[0]) || attr[1].empty?
+            end
+          end
         end
       end
       doc.to_html
