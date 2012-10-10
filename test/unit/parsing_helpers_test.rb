@@ -23,9 +23,17 @@ class ParsingHelpersTest  < Test::Unit::TestCase
     assert_equal '', try_extract(xml_node, 'NotExist')
   end
   
-  # TODO: complete test when including module in client object
   def test_error_messages_traps_e_shipper_error_messages_in_last_response
     xml_path = "#{File.dirname(__FILE__)}/../support/error.xml"
     doc = Nokogiri::XML(File.open(xml_path))
+
+    assert_equal ["Required field: Name is missing."], error_messages(doc)
+
+    xml_path = "#{File.dirname(__FILE__)}/../support/error_2.xml"
+    doc = Nokogiri::XML(File.open(xml_path))
+
+    assert_equal ["Required field:  is missing."], error_messages(doc)
   end
+
+  #TODO: test with inclusion in a module too
 end

@@ -1,36 +1,33 @@
 require 'net/http'
 require 'builder'
 require 'nokogiri'
+require 'singleton'
 
 module EShipper
   class Client
     include EShipper::ParsingHelpers
+    include Singleton
     
     COMMON_REQUEST_OPTIONS = {:EShipper => {:version => "3.0.0"},
       :QuoteRequest => {:insuranceType => "Carrier"},
       :Packages => {:type => "Package"}
     }
     
-    attr_accessor :username, :password, :url, :from, :to, 
-                  :pickup, :packages, :references, :responses
+    attr_reader :username, :password, :url, :from, :to, 
+                :pickup, :packages, :references, :responses
 
-    def initialize(options = {})
+    def initialize
       @options = 
-      case options
-      when {} 
-        if defined?(Rails.env) 
-          rails_config_path = Rails.root.join('config', 'e_shipper.yml')
-          YAML.load_file(rails_config_path)[Rails.env] if File.exist?(rails_config_path)
-        end
-      when String
-        YAML.load_file(options) if File.exist?(options)
+      if defined?(Rails.env) 
+        rails_config_path = Rails.root.join('config', 'e_shipper.yml')
+        YAML.load_file(rails_config_path)[Rails.env] if File.exist?(rails_config_path)
       else
-        options
-      end.symbolize_keys!
+        gem_config_path = File.expand_path("#{File.dirname(__FILE__)}/../../conf/e_shipper.yml")
+        YAML.load_file(gem_config_path)['production'] if File.exist?(gem_config_path)
+      end
+      @options.symbolize_keys!
 
-      @username = ENV['E_SHIPPER_USERNAME'] || @options[:username]
-      @password = ENV['E_SHIPPER_PASSWORD'] || @options[:password]
-      @url      = ENV['E_SHIPPER_URL']      || @options[:url]
+      @username, @password, @url = @options[:username], @options[:password], @options[:url]
       
       raise 'No username specified.' if @username.nil? || @username.empty?
       raise 'No password specified.' if @password.nil? || @password.empty?
@@ -125,12 +122,12 @@ module EShipper
     end
 
     def validate_last_response
-      last_response.errors.empty?
+      last_response.errors.empty? && (!last_response.xml.empty?)
     end
 
     def prepare_request!(*attrs_data) 
       from, to, pickup, packages, references = attrs_data
-      
+    
       @from = EShipper::Address.new(from).validate! if from
       @to = EShipper::Address.new(to).validate! if to
       @pickup = EShipper::Pickup.new(pickup).validate! if pickup

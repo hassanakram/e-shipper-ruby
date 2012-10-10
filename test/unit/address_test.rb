@@ -4,7 +4,7 @@ class AddressTest  < Test::Unit::TestCase
 
   def test_valid_address
     address = EShipper::Address.new({:id => "123", :company=>"Vitamonthly", :address1=>"650 CIT Drive", :address2=>"Apt B-2",
-      :city=>"Livingston", :state=>"ON", :zip=>"L4J7Y9", :country=>"CA", :phone=>"888-888-8888",
+      :city=>"Livingston", :state=>"ON", :zip=>"L4J7Y9", :country=>"CA", :phone => "888-888-8888",
       :attention => "Vitamonthly", :email => "eshipper@vitamonthly.com"})
 
     assert address.validate!
@@ -18,6 +18,14 @@ class AddressTest  < Test::Unit::TestCase
 
     address2 = EShipper::Address.new({:invalid => "invalid"})
     assert_raise(ArgumentError) { address2.validate! }
+  end
+
+  def test_nil_values_for_required_fields_are_not_allowed
+     address = EShipper::Address.new({:id => "123", :company=>"Vitamonthly", :address1=>"650 CIT Drive", :address2=>"Apt B-2",
+      :city=>"Livingston", :state=>"ON", :zip=>"L4J7Y9", :country => nil, :phone => nil,
+      :attention => "Vitamonthly", :email => "eshipper@vitamonthly.com"})
+
+     assert_raise(StandardError) { address.validate! } 
   end
   
   def test_description_render_html_of_the_address_content

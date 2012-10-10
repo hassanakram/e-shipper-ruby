@@ -13,7 +13,8 @@ module EShipper
         end
       end
       
-      self.responses.first.errors = errors if (!errors.empty?) && self.respond_to?(:responses) && self.responses.first    
+      self.last_response.errors = errors if (!errors.empty?) && self.respond_to?(:responses) && self.last_response    
+      errors
     end
 
     def try_extract(xml_node, value)
