@@ -8,11 +8,6 @@ module EShipper
     include EShipper::ParsingHelpers
     include Singleton
     
-    COMMON_REQUEST_OPTIONS = {:EShipper => {:version => "3.0.0"},
-      :QuoteRequest => {:insuranceType => "Carrier"},
-      :Packages => {:type => "Package"}
-    }
-    
     attr_reader :username, :password, :url, :from, :to, 
                 :pickup, :packages, :references, :responses
 
@@ -40,9 +35,9 @@ module EShipper
       @packages, @references, @responses = [], [], []
     end
 
-    def parse_quotes(options=COMMON_REQUEST_OPTIONS)
+    def parse_quotes(options={})
       result = []
-      xml_data = send_request options
+      xml_data = EShipper::QuoteRequest.new.send_now(options)
 
       error_messages xml_data
       
@@ -67,9 +62,9 @@ module EShipper
       result.sort_by(&:total_charge)
     end
 
-    def parse_shipping(options=COMMON_REQUEST_OPTIONS)
+    def parse_shipping(options={})
       shipping_reply = nil
-      xml_data = send_request options, 'shipping'
+      xml_data = EShipper::ShippingRequest.new.send_now(options)
 
       error_messages xml_data
    
@@ -141,89 +136,6 @@ module EShipper
       if references
         references.each do |reference_data|
           @references << EShipper::Reference.new(reference_data).validate!
-        end
-      end
-    end
-
-    private
-    
-    def send_request(options, type='quote')
-      options[:EShipper][:username] = @username
-      options[:EShipper][:password] = @password
-      options[:From] = @from if @from
-      options[:To] = @to if @to
-      options[:Pickup] = @pickup if @pickup
-      options[:PackagesList] = @packages if(@packages && !@packages.empty?)
-      options[:References] = @references if(@references && !@references.empty?)
-      options.symbolize_keys!
-
-      request_body = send("build_#{type}_request_body", options)
-
-      uri = URI(@url)
-      http_request = Net::HTTP::Post.new(uri.path)
-      http_request.body = request_body
-
-      http_response = Net::HTTP.start(uri.host, uri.port) do |http|
-        http.request(http_request)
-      end
- 
-      @responses << EShipper::Response.new(type, http_response.body)
-      Nokogiri::XML(http_response.body)
-    rescue NoMethodError
-      raise "Verify that the mandatory data 'from', 'to', 'packages' are set on the client or in the request options"
-    end
-
-    #NOTE: requests generators
-    def build_quote_request_body(options)
-      request = Builder::XmlMarkup.new(:indent=>2)
-      request.instruct!
-      request.EShipper(options[:EShipper], :xmlns=>"http://www.eshipper.net/XMLSchema") do |eshipper|
-        eshipper.QuoteRequest(options[:QuoteRequest]) do |quote|
-          quote.From(options[:From].attributes)
-          quote.To(options[:To].attributes)
-          if options[:COD] then quote.COD(options[:COD]) do |cod|
-              cod.CODReturnAddress(options[:CODReturnAddress])
-            end
-          end
-          quote.Packages(options[:Packages]) do |packs|
-            options[:PackagesList].each do |package|
-              packs.Package(package.attributes)
-            end
-          end
-          if options[:Pickup] then quote.Pickup(options[:Pickup].attributes) end
-        end
-      end
-    end
- 
-    def build_shipping_request_body(options)
-      request = Builder::XmlMarkup.new(:indent=>2)
-      request.instruct!
-      request.EShipper(options[:EShipper], :xmlns=>"http://www.eshipper.net/XMLSchema") do |eshipper|
-        eshipper.ShippingRequest(options[:QuoteRequest]) do |shipping|
-          shipping.From(options[:From].attributes)
-          shipping.To(options[:To].attributes)
-          if options[:COD] then shipping.COD(options[:COD]) do |cod|
-              cod.CODReturnAddress(options[:CODReturnAddress])
-            end
-          end
-          shipping.Packages(options[:Packages]) do |packs|
-            options[:PackagesList].each do |package|
-              packs.Package(package.attributes)
-            end
-          end
-          if options[:Pickup] then shipping.Pickup(options[:Pickup].attributes) end
-          shipping.Payment(options[:Payment])
-          unless options[:References].empty? then options[:References].each do |reference|
-              shipping.Reference(reference.attributes)
-            end
-          end
-          if options[:CustomsInvoice] then shipping.CustomsInvoice(options[:CustomsInvoice]) do |invoice|
-              invoice.BillTo(options[:CustomsInvoice][:BillTo])
-              invoice.Contact(options[:CustomsInvoice][:Contact])
-              invoice.Item(options[:CustomsInvoice][:Item])
-              if options[:DutiesTaxes] then invoice.DutiesTaxes(options[:CustomsInvoice][:DutiesTaxes]) end
-            end
-          end
         end
       end
     end

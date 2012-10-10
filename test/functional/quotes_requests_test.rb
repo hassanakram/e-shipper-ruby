@@ -15,7 +15,7 @@ class QuotesRequestsTest  < Test::Unit::TestCase
     
     @packages = [package1_data, package2_data]
 
-    @options = EShipper::Client::COMMON_REQUEST_OPTIONS
+    @options = {}
     @client = EShipper::Client.instance
   end
 

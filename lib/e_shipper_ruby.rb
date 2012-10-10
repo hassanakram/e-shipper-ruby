@@ -12,4 +12,7 @@ require File.dirname(__FILE__) + '/e_shipper_ruby/classes/reference'
 require File.dirname(__FILE__) + '/e_shipper_ruby/classes/response'
 require File.dirname(__FILE__) + '/e_shipper_ruby/classes/surcharge'
 require File.dirname(__FILE__) + '/e_shipper_ruby/classes/shipping_reply'
+require File.dirname(__FILE__) + '/e_shipper_ruby/classes/request'
+require File.dirname(__FILE__) + '/e_shipper_ruby/classes/shipping_request'
+require File.dirname(__FILE__) + '/e_shipper_ruby/classes/quote_request'
  
