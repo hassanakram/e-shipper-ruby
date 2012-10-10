@@ -1,44 +1,23 @@
 require File.expand_path("#{File.dirname(__FILE__)}/../test_helper")
 
 class ClientTest  < Test::Unit::TestCase
-  def test_initialize_a_client_from_given_options
-    username, password, url = %w{vitamonthly 1234 http://fake_url.com}
-    client = EShipper::Client.new :username => username, :password => password, :url => url
-    assert_equal username, client.username
-    assert_equal password, client.password
-    assert_equal url, client.url
-  end
-  
-  def test_initialize_assigns_e_shipper_default_urls
-    username, password = %w{vitamonthly 1234}
-    client = EShipper::Client.new :username => username, :password => password
-    assert_equal 'http://test.eshipper.com/eshipper/rpc2', client.url
-   
-    set_env_rails_equal_production
 
-    client = EShipper::Client.new :username => username, :password => password
-    assert_equal 'http://www.eshipper.com/rpc2', client.url
-  end
-  
-  def test_initialize_give_priority_to_env_variables
-    set_env_default_configuration
-    username, password, url = %w{vitamonthly 1234 http://fake_url.com}
-    client = EShipper::Client.new :username => username, :password => password, :url => url
-    assert_equal ENV['E_SHIPPER_USERNAME'], client.username
-    assert_equal ENV['E_SHIPPER_PASSWORD'], client.password
-    assert_equal ENV['E_SHIPPER_URL'], client.url
-  end
-  
-  def test_initialize_raises_error
-    clear_env
+  def test_we_instanciate_a_singleton_instance
     assert_raise(NoMethodError) { EShipper::Client.new }
-    assert_raise(RuntimeError) { EShipper::Client.new :username => '', :password => '1234' }
-    assert_raise(RuntimeError) { EShipper::Client.new :username => 'name', :password => '' }
+    assert_raise(NoMethodError) { EShipper::Client.new :username => '', :password => '1234' }
+    assert_nothing_raised { EShipper::Client.instance }
+  end
+
+  def test_initialize_attrs_from_config_file
+    client = EShipper::Client.instance
+    assert_equal 'vitamonthly', client.username
+    assert_equal '1234', client.password
+    assert_equal 'http://test.eshipper.com/eshipper/rpc2', client.url
   end
   
-  def test_accessible_attributes
+  def test_accessible_attributes_throw_singleton_instance
     assert_nothing_raised do
-      client = EShipper::Client.new :username => 'name', :password => '1234'
+      client = EShipper::Client.instance
       client.from
       client.to
       client.pickup
@@ -48,7 +27,7 @@ class ClientTest  < Test::Unit::TestCase
   end
     
   def test_parse_quotes_returns_sorted_quotes_by_increasing_total_charge
-    client = EShipper::Client.new :username => 'name', :password => '1234'
+    client = EShipper::Client.instance
     xml_path = "#{File.dirname(__FILE__)}/../support/quote.xml"
     client.stubs(:send_request).returns Nokogiri::XML(File.open(xml_path))
     
@@ -62,7 +41,7 @@ class ClientTest  < Test::Unit::TestCase
   end
   
   def test_parse_quotes_returns_nested_e_shipper_objects
-    client = EShipper::Client.new :username => 'name', :password => '1234'
+    client = EShipper::Client.instance
     xml_path = "#{File.dirname(__FILE__)}/../support/quote.xml"
     client.stubs(:send_request).returns Nokogiri::XML(File.open(xml_path))
     
@@ -81,7 +60,7 @@ class ClientTest  < Test::Unit::TestCase
   end
   
   def test_parse_quotes_returns_an_empty_array_and_trap_e_shipper_error_message
-    client = EShipper::Client.new :username => 'name', :password => '1234'
+    client = EShipper::Client.instance
     xml_path = "#{File.dirname(__FILE__)}/../support/error.xml"
     client.stubs(:send_request).returns Nokogiri::XML(File.open(xml_path))
     
@@ -90,7 +69,7 @@ class ClientTest  < Test::Unit::TestCase
   end
   
   def test_parse_shipping_returns_an_array_of_shippings
-    client = EShipper::Client.new :username => 'name', :password => '1234'
+    client = EShipper::Client.instance
     xml_path = "#{File.dirname(__FILE__)}/../support/shipping.xml"
     client.stubs(:send_request).returns Nokogiri::XML(File.open(xml_path))
     
@@ -117,7 +96,7 @@ class ClientTest  < Test::Unit::TestCase
   end
 
   def test_parse_shipping_returns_nil_and_trap_e_shipper_error_message
-    client = EShipper::Client.new :username => 'name', :password => '1234'
+    client = EShipper::Client.instance
     xml_path = "#{File.dirname(__FILE__)}/../support/error.xml"
     client.stubs(:send_request).returns Nokogiri::XML(File.open(xml_path))
     
@@ -125,7 +104,7 @@ class ClientTest  < Test::Unit::TestCase
   end
   
   def test_last_response_returns_last_response
-    client = EShipper::Client.new :username => 'name', :password => '1234'
+    client = EShipper::Client.instance
     response = EShipper::Response.new('quote', '')
     client.responses << response
     
@@ -133,30 +112,38 @@ class ClientTest  < Test::Unit::TestCase
   end
   
   def test_validate_last_response_returns_false_if_last_response_contains_errors
-    client = EShipper::Client.new :username => 'name', :password => '1234'
+    client = EShipper::Client.instance 
     response = EShipper::Response.new('quote', '')
     response.errors = ['Java Error: out of memory'] 
     client.responses << response
     
     assert !client.validate_last_response
   end
+  
+  def test_validate_last_response_returns_false_if_last_response_contains_empty_xml_result_data
+    client = EShipper::Client.instance 
+    response = EShipper::Response.new('quote', '')
+    client.responses << response
+    
+    assert !client.validate_last_response
+  end
 
   def test_validate_last_response_returns_true_if_last_response_contains_no_errors
-    client = EShipper::Client.new :username => 'name', :password => '1234'
-    response = EShipper::Response.new('quote', '')
+    client = EShipper::Client.instance 
+    response = EShipper::Response.new('quote', 'good xml response')
     client.responses << response
     
     assert client.validate_last_response
   end
   
   def test_prepare_request_run_validations
-    client = EShipper::Client.new :username => 'name', :password => '1234'
+    client = EShipper::Client.instance
     from_data = {:id => '123', :company => 'new_company' }
     assert_raises(ArgumentError) { client.prepare_request!(from_data) }
   end
   
   def test_prepare_request_create_safety_client_attributes
-    client = EShipper::Client.new :username => 'name', :password => '1234'
+    client = EShipper::Client.instance
     references_data = [{:name => 'Vitamonthly', :code => 'AAA'}]
     options = [nil, nil, nil, nil, references_data]
     
@@ -164,25 +151,5 @@ class ClientTest  < Test::Unit::TestCase
     assert_equal 'Vitamonthly', client.references.first.name
     assert_equal 'AAA', client.references.first.code
   end
-  
-  private
-  
-  def set_env_rails_equal_production 
-    Kernel.const_set :Rails, nil
-    def Rails.env
-      'production'
-    end
-  end
-  
-  def set_env_default_configuration
-    ENV['E_SHIPPER_USERNAME'] = 'fake username'
-    ENV['E_SHIPPER_PASSWORD'] = 'fake password'
-    ENV['E_SHIPPER_URL'] = 'fake url'
-  end
-  
-  def clear_env
-    ENV['E_SHIPPER_USERNAME'] = nil
-    ENV['E_SHIPPER_PASSWORD'] = nil
-    ENV['E_SHIPPER_URL'] = nil
-  end
+
 end

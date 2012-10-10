@@ -1,0 +1,5 @@
+<EShipper xmlns="http://www.eshipper.net/xml/XMLSchema" version="3.0.0">
+	<ErrorReply>
+		<Error Message="Required field:  is missing."/>
+	</ErrorReply>
+</EShipper>

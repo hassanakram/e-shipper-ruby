@@ -29,7 +29,7 @@ class EShipperRubyTest  < Test::Unit::TestCase
       :Packages => {:type=>"Package"}, :PackagesList => @packages,
       :Pickup => @pickup}
 
-    @client = EShipper::Client.new(:username => "vitamonthly", :password => "1234")
+    @client = EShipper::Client.instance
   end
 
   def test_private_quote_request_is_parsable
