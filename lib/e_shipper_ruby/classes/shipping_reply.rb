@@ -3,7 +3,9 @@ module EShipper
   class ShippingReply < OpenStruct
   	attr_accessor :references, :package_tracking_numbers, :quote
 
-    POSSIBLE_FIELDS = [:order_id, :carrier_name, :service_name, :tracking_url, :pickup_message, :pickup_confirmation_number]
+    POSSIBLE_FIELDS = [:order_id, :carrier_name, :service_name, :tracking_url, :pickup_message, 
+    	:pickup_confirmation_number, :labels, :custom_invoices
+    ]
     REQUIRED_FIELDS = []
 
     def initialize(attributes = {})
@@ -12,12 +14,16 @@ module EShipper
     end
 
     def description
+      attrs = self.attributes
+      attrs.delete('labels')
+      attrs.delete('customs_invoice')	
+
       doc = Nokogiri::HTML::DocumentFragment.parse ""
       Nokogiri::HTML::Builder.with(doc) do |doc|
 		doc.div(:class => 'e_shipper_shipping_reply_description') do
-		  doc.h2 'Shipping reply description'
+		  doc.h2 'Shipping description'
 		  doc.ul do
-		    self.attributes.each do |attr|
+		    attrs.each do |attr|
 			  doc.li "#{attr[0]}: #{attr[1]}" if attr[1] && (!attr[1].empty?)
 		    end
 		  end
