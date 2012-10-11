@@ -1,8 +1,9 @@
+#NOTE: labels et custom invoices contains base-64 data to build PDF files 
 module EShipper
   class ShippingReply < OpenStruct
   	attr_accessor :references, :package_tracking_numbers, :quote
 
-    POSSIBLE_FIELDS = [:order_id, :carrier_name, :service_name, :tracking_url, :pickup_message]
+    POSSIBLE_FIELDS = [:order_id, :carrier_name, :service_name, :tracking_url, :pickup_message, :pickup_confirmation_number]
     REQUIRED_FIELDS = []
 
     def initialize(attributes = {})
@@ -17,7 +18,7 @@ module EShipper
 		  doc.h2 'Shipping reply description'
 		  doc.ul do
 		    self.attributes.each do |attr|
-			  doc.li "#{attr[0]}: #{attr[1]}" unless attr[1].empty?
+			  doc.li "#{attr[0]}: #{attr[1]}" if attr[1] && (!attr[1].empty?)
 		    end
 		  end
 		  doc.div(:class => 'e_shipper_tracking_numbers') do
@@ -36,7 +37,7 @@ module EShipper
 			      doc.div(:class => 'e_shipper_reference_description') do
 			        doc.ul do
 		              reference.attributes.each do |attr|
-			            doc.li "#{attr[0]}: #{attr[1]}" unless attr[1].empty?
+			            doc.li "#{attr[0]}: #{attr[1]}" if attr[1] && (!attr[1].empty?)
 		              end
 		            end
 		          end
@@ -48,7 +49,7 @@ module EShipper
 		    doc.h2 "Quote description:"
 		    doc.ul do
 		      @quote.attributes.each do |attr|
-			    doc.li "#{attr[0]}: #{attr[1]}" unless attr[1].empty?
+			    doc.li "#{attr[0]}: #{attr[1]}" if attr[1] && (!attr[1].empty?)
 		      end
 		    end
 		  end

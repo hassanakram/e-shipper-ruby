@@ -6,9 +6,6 @@ module EShipper
       :pickupTime, :closingTime, :location
     ]
 
-    REQUIRED_FIELDS = [
-      :contactName, :phoneNumber, :pickupDate,
-      :pickupTime, :closingTime
-    ]
+    REQUIRED_FIELDS = POSSIBLE_FIELDS
   end
 end

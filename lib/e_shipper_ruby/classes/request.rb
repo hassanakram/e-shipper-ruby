@@ -1,6 +1,6 @@
 module EShipper
-	class Request
-		attr_reader :from, :to, :pickup, :packages, :references, :service_id
+  class Request
+    attr_reader :from, :to, :pickup, :packages, :references, :service_id
 
     COMMON_REQUEST_OPTIONS = {
       :QuoteRequest => {:insuranceType => "Carrier"},
@@ -36,12 +36,12 @@ module EShipper
       uri = URI(EShipper::Client.instance.url)
       http_request = Net::HTTP::Post.new(uri.path)
       http_request.body = request_body
-]
+
       http_response = Net::HTTP.start(uri.host, uri.port) do |http|
         http.request(http_request)
       end
-      
+
       http_response.body 
-   	end
-	end
+    end
+  end
 end

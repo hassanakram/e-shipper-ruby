@@ -35,7 +35,7 @@ module EShipper
           doc.h2 "#{class_name} description"
           doc.ul do
             self.attributes.each do |attr|
-              doc.li "#{attr[0]}: #{attr[1]}" unless attr[1].empty?
+              doc.li "#{attr[0]}: #{attr[1]}" if attr[1] && (!attr[1].empty?)
             end
           end
         end

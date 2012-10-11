@@ -79,6 +79,7 @@ module EShipper
           :carrier_name => try_direct_extract(xml_data, 'Carrier', 'carrierName'), 
           :service_name => try_direct_extract(xml_data, 'Carrier', 'serviceName'), 
           :tracking_url => try_direct_extract(xml_data, 'TrackingURL'), 
+          :pickup_confirmation_number => try_direct_extract(xml_data, 'Pickup', 'confirmationNumber'),
           :pickup_message => try_direct_extract(xml_data, 'Pickup', 'errorMessage')
         }
         shipping_reply = EShipper::ShippingReply.new(data)
