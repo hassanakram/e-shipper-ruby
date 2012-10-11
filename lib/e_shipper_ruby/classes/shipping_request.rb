@@ -1,5 +1,5 @@
 module EShipper
-	class ShippingRequest < EShipper::Request
+  class ShippingRequest < EShipper::Request
 
 		def request_body
       client = EShipper::Client.instance

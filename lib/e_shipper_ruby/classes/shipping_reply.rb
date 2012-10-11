@@ -14,24 +14,44 @@ module EShipper
       doc = Nokogiri::HTML::DocumentFragment.parse ""
       Nokogiri::HTML::Builder.with(doc) do |doc|
 		doc.div(:class => 'e_shipper_shipping_reply_description') do
-		  doc.h2 'Shippin reply description'
+		  doc.h2 'Shipping reply description'
 		  doc.ul do
 		    self.attributes.each do |attr|
 			  doc.li "#{attr[0]}: #{attr[1]}" unless attr[1].empty?
 		    end
 		  end
 		  doc.div(:class => 'e_shipper_tracking_numbers') do
-			doc.h2 "Tracking numbers:"	
-			@package_tracking_numbers.each do |tracking_number|
-			  doc.span "#{tracking_number}"
-			end
+			doc.h2 "Tracking numbers:"
+			doc.ul do	
+			  @package_tracking_numbers.each do |tracking_number|
+			    doc.li "#{tracking_number}"
+			  end
+		    end
 		  end
 		  doc.div(:class => 'e_shipper_references') do
-			@references.each do |reference|
-			  doc.span reference.description	
-			end
+		  	doc.h2 "References:"
+		  	doc.ul do
+			  @references.each do |reference|
+			    doc.li do
+			      doc.div(:class => 'e_shipper_reference_description') do
+			        doc.ul do
+		              reference.attributes.each do |attr|
+			            doc.li "#{attr[0]}: #{attr[1]}" unless attr[1].empty?
+		              end
+		            end
+		          end
+			    end
+			  end
+		    end
 		  end
-		  doc.div @quote.description(:complete)
+		  doc.div(:class => 'e_shipper_quote_description') do
+		    doc.h2 "Quote description:"
+		    doc.ul do
+		      @quote.attributes.each do |attr|
+			    doc.li "#{attr[0]}: #{attr[1]}" unless attr[1].empty?
+		      end
+		    end
+		  end
         end
       end
       doc.to_html

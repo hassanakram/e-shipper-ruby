@@ -58,16 +58,19 @@ class ShippingRequestsTest  < Test::Unit::TestCase
     assert @client.validate_last_response
   end
 
-  #TODO: test when no info are available
-  # @options[:from] = {:id => "123", :company => "Hospital", :address1 => "1403 29 Street NW", 
-  #   :city => "Calgary", :state => "AB", :zip => "T2N2T9", :country => "CA",
-  #   :phone => '888-888-8888', :attention => 'vitamonthly', :email => 'damien@gmail.com'}
-    
-  # @options[:to] == {:id => '234', :company => "Hospital", :address1 => "909 Bd de la Verendrye",
-  #   :city => "Gatineau", :state => "QC", :zip => "J8V2L6", :country => "CA",
-  #   :phone => '888-888-8888', :attention => 'vitamonthly', :email => 'damien@gmail.com'}
-
-  #TODO
   def test_sending_a_quote_request_following_by_a_shipping_one_dont_break_the_server
+    @options[:from] = {:id => "123", :company => "Hospital", :address1 => "1403 29 Street NW", 
+      :city => "Calgary", :state => "AB", :zip => "T2N2T9", :country => "CA",
+      :phone => '888-888-8888', :attention => 'vitamonthly', :email => 'damien@gmail.com'}
+      
+    @options[:to] == {:id => '234', :company => "Hospital", :address1 => "909 Bd de la Verendrye",
+      :city => "Gatineau", :state => "QC", :zip => "J8V2L6", :country => "CA",
+    :phone => '888-888-8888', :attention => 'vitamonthly', :email => 'damien@gmail.com'}
+
+    response = @client.parse_quotes @options
+    assert !response.nil?
+    
+    response = @client.parse_shipping @options
+    assert !response.nil?
   end
 end

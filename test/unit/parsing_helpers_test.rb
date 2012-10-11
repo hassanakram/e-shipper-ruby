@@ -34,6 +34,4 @@ class ParsingHelpersTest  < Test::Unit::TestCase
 
     assert_equal ["Required field:  is missing."], error_messages(doc)
   end
-
-  #TODO: test with inclusion in a module too
 end

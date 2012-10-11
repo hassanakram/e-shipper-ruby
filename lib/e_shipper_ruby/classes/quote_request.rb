@@ -1,5 +1,5 @@
 module EShipper
-	class QuoteRequest < EShipper::Request
+  class QuoteRequest < EShipper::Request
 		
     def request_body
       client = EShipper::Client.instance
