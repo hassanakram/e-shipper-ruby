@@ -82,7 +82,7 @@ module EShipper
           :pickup_confirmation_number => try_direct_extract(xml_data, 'Pickup', 'confirmationNumber'),
           :pickup_message => try_direct_extract(xml_data, 'Pickup', 'errorMessage'),
           :labels => try_direct_extract(xml_data, 'Labels'),
-          :customs_invoice => try_direct_extract(xml_data, 'CustomsInvoice') 
+          :customer_invoice => try_direct_extract(xml_data, 'CustomsInvoice') 
         }
         shipping_reply = EShipper::ShippingReply.new(data)
         

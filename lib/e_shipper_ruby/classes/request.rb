@@ -1,6 +1,6 @@
 module EShipper
   class Request
-    attr_reader :from, :to, :pickup, :packages, :references, :service_id
+    attr_reader :from, :to, :pickup, :packages, :references, :service_id, :invoice
 
     COMMON_REQUEST_OPTIONS = {
       :QuoteRequest => {:insuranceType => "Carrier"},
@@ -30,6 +30,15 @@ module EShipper
           @references << EShipper::Reference.new(reference_data).validate!
         end
       end
+
+      if data[:invoice]
+        items_data = data[:invoice].delete :items
+        invoice = EShipper::Invoice.new(data[:invoice]).validate!
+        items_data.each do |item_data|
+          invoice.items << EShipper::Item.new(item_data).validate!
+        end
+        @invoice = invoice
+      end
     end
 
 		def send_now
@@ -40,7 +49,7 @@ module EShipper
       http_response = Net::HTTP.start(uri.host, uri.port) do |http|
         http.request(http_request)
       end
-      
+
       http_response.body 
     end
   end

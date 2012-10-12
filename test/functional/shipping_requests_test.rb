@@ -73,4 +73,16 @@ class ShippingRequestsTest  < Test::Unit::TestCase
     response = @client.parse_shipping @options
     assert !response.nil?
   end
+
+  def test_obtaining_invoice_data
+    @options[:invoice] = { :broker_name => 'John Doe', :contact_company => 'MERITCON INC',
+      :name => 'Jim', :contact_name => 'Rizwan', :contact_phone => '555-555-4444',
+      :dutiable => 'true', :duty_tax_to => 'receiver',
+      :items => [{:code => '1234', :description => 'Laptop computer', :originCountry =>  'US', 
+        :quantity => '100', :unitPrice => '1000.00'}]
+    }
+
+    response = @client.parse_shipping @options
+    assert !response.customer_invoice.nil?
+  end
 end

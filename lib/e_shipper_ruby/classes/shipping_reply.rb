@@ -4,7 +4,7 @@ module EShipper
   	attr_accessor :references, :package_tracking_numbers, :quote
 
     POSSIBLE_FIELDS = [:order_id, :carrier_name, :service_name, :tracking_url, :pickup_message, 
-    	:pickup_confirmation_number, :labels, :custom_invoices
+    	:pickup_confirmation_number, :labels, :customer_invoice
     ]
     REQUIRED_FIELDS = []
 
@@ -16,7 +16,7 @@ module EShipper
     def description
       attrs = self.attributes
       attrs.delete('labels')
-      attrs.delete('customs_invoice')	
+      attrs.delete('customer_invoice')	
 
       doc = Nokogiri::HTML::DocumentFragment.parse ""
       Nokogiri::HTML::Builder.with(doc) do |doc|

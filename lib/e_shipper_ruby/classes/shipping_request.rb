@@ -31,6 +31,22 @@ module EShipper
                 xml.Reference(reference.attributes)
               end
             end
+
+            if @invoice
+              bill_to = @to.attributes.merge!(:name => @pickup[:contactName])
+
+              xml.CustomsInvoice('brokerName' => @invoice.broker_name,
+                'contactCompany' => @invoice.contact_company,
+                'contactName' => @invoice.contact_name) do
+
+                xml.BillTo(bill_to) if @to
+                xml.Contact(:name => @invoice.contact_name, :phone => @invoice.contact_phone)
+                @invoice.items.each do |item|
+                  xml.Item(item.attributes)
+                end
+                xml.DutiesTaxes(:dutiable => @invoice.dutiable, :billTo => @invoice.duty_tax_to)
+              end
+            end
           end
         end
       end
