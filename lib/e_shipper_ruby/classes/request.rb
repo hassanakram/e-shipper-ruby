@@ -31,10 +31,9 @@ module EShipper
         end
       end
 
-      if data[:invoice]
-        items_data = data[:invoice].delete :items
+      if data[:invoice] && data[:items]
         invoice = EShipper::Invoice.new(data[:invoice]).validate!
-        items_data.each do |item_data|
+        data[:items].each do |item_data|
           invoice.items << EShipper::Item.new(item_data).validate!
         end
         @invoice = invoice
