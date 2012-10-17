@@ -24,9 +24,10 @@ To contribute, fork this repo, make changes in your fork, then send a pull reque
 When you create a Eshipper::Client object, you need to configure it with your username and password on the e-shipper server url (production or test). Create a 'e_shipper.yml' YAML file under your Rails config/ repository (example available under cong/e_shipper.yml).
 
 == Running tests
-Be sure to edit file 'e_shipper.yml' with your e-shipper credentials and run the following commands:
+Be sure to create file 'config/e_shipper.yml' from 'config/e_shipper.yml.example' and edit it with your e-shipper credentials.
+Then, you can run the following commands:
      rake test:unit
-     rake test:functional
+     rake test:functional (real requests to the e-shipper testing server)
 
 You can run one test at a time in this way:  ruby test/unit/my_test.rb
 

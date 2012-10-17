@@ -17,5 +17,5 @@ spec/reports
 test/tmp
 test/version_tmp
 tmp
-conf/
+config/e_shipper.yml
 coverage/

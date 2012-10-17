@@ -10,8 +10,8 @@ class ClientTest  < Test::Unit::TestCase
 
   def test_initialize_attrs_from_config_file
     client = EShipper::Client.instance
-    assert_equal 'fake user', client.username
-    assert_equal '1234', client.password
+    assert_not_nil client.username
+    assert_not_nil client.password
     assert_equal 'http://test.eshipper.com/eshipper/rpc2', client.url
   end
     

@@ -48,8 +48,8 @@ class QuotesRequestsTest  < Test::Unit::TestCase
     assert_not_equal 0, response.count
     first_quote = response[0]
     assert first_quote, 'Problem with EShipper server'
-    assert_equal '6', first_quote.service_id
-    assert_equal 'Purolator Express 1030', first_quote.service_name
+    assert_not_nil first_quote.service_id
+    assert_not_nil first_quote.service_name
   end
 
   def test_sending_2_continous_requests_dont_break_the_server
@@ -66,6 +66,23 @@ class QuotesRequestsTest  < Test::Unit::TestCase
 
     response = @client.parse_quotes @options
     assert_not_equal 0, response.count
+  end
+
+  def test_parse_quotes_given_a_service_id
+    @options[:from] = {:id => "123", :company => "fake company", :address1 => "650 CIT Drive", 
+      :city => "Livingston", :state => "ON", :zip => "L4J7Y9", :country => "CA",
+      :phone => '888-888-8888', :attention => 'fake attention', :email => 'eshipper@gmail.com'}
+
+    @options[:to] = {:id => "234", :company => "Healthwave", :address1 => "185 Rideau Street", :address2=>"Second Floor",
+      :city => "Ottawa", :state => "ON", :zip => "K1N 5X8", :country => "CA",
+      :phone => '888-888-8888', :attention => 'fake attention', :email => 'eshipper@gmail.com'}
+    
+    @options[:service_id] = '6'
+
+    response = @client.parse_quotes @options
+    assert_equal 1, response.count
+    first_quote = response[0]
+    assert_equal '6', first_quote.service_id
   end
 
 end

@@ -4,6 +4,7 @@ module EShipper
     def request_body
       client = EShipper::Client.instance
       options = COMMON_REQUEST_OPTIONS
+      options[:QuoteRequest].merge!(:serviceId => @service_id) if @service_id
 
 			builder = Nokogiri::XML::Builder.new do |xml|
         xml.EShipper(:version => "3.0.0", :xmlns => "http://www.eshipper.net/XMLSchema", 

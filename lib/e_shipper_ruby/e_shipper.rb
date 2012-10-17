@@ -15,7 +15,7 @@ module EShipper
         rails_config_path = Rails.root.join('config', 'e_shipper.yml')
         YAML.load_file(rails_config_path)[Rails.env] if File.exist?(rails_config_path)
       else
-        gem_config_path = File.expand_path("#{File.dirname(__FILE__)}/../../conf/e_shipper.yml")
+        gem_config_path = File.expand_path("#{File.dirname(__FILE__)}/../../config/e_shipper.yml")
         YAML.load_file(gem_config_path) if File.exist?(gem_config_path)
       end
       @options.symbolize_keys!
