@@ -26,7 +26,7 @@ module EShipper
       raise 'No password specified.' if @password.nil? || @password.empty?
       if @url.nil? || @url.empty?
         @url = (defined?(Rails.env) && 'production' == Rails.env) ?
-          'http://www.eshipper.com/rpc2' : 'http://test.eshipper.com/eshipper/rpc2'
+          'http://www.eshipper.net/rpc2' : 'http://test.eshipper.com/eshipper/rpc2'
       end
     end
 
