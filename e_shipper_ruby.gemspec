@@ -5,7 +5,7 @@ Gem::Specification.new do |gem|
   gem.name          = 'e_shipper_ruby'
   gem.version       = EShipperRuby::VERSION
   gem.authors       = ['Daniel Gonzalez', 'Chris Wise', 'Damien Imberdis']
-  gem.email         = ['dangt85@gmail.com']
+  gem.email         = ['chris@healthwave.co']
   gem.description   = %q{e-shipper API client}
   gem.summary       = %q{e-shipper shipping service XML API wrapper for Ruby}
   gem.homepage      = 'https://github.com/HealthyWeb/e-shipper-ruby'

@@ -34,9 +34,19 @@ class ShippingRequestTest  < Test::Unit::TestCase
     @shipping_request.prepare! options
   end
 
-  #TODO: better xml content tests
   def test_request_body_generating_a_well_formed_xml_quote_request
   	xml = @shipping_request.request_body
-  	assert_not_nil xml
+  	doc = Nokogiri::XML(xml)
+ 
+    assert !doc.css('ShippingRequest').empty?
+    assert !doc.css('From').empty?
+    assert !doc.css('To').empty?
+    assert !doc.css('Pickup').empty?
+    assert !doc.css('Packages').empty?
+    assert !doc.css('Reference').empty?
+    assert !doc.css('CustomsInvoice').empty?
+    assert !doc.css('Payment').empty?
+    assert !doc.css('BillTo').empty?
+    assert !doc.css('Item').empty?
   end
 end

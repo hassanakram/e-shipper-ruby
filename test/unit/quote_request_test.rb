@@ -24,9 +24,14 @@ class QuoteRequestTest  < Test::Unit::TestCase
     @quote_request.prepare! options
   end
 
-  #TODO: better xml content tests
   def test_request_body_generating_a_well_formed_xml_quote_request
   	xml = @quote_request.request_body
-  	assert_not_nil xml
+    doc = Nokogiri::XML(xml)
+
+  	assert !doc.css('QuoteRequest').empty?
+    assert !doc.css('From').empty?
+    assert !doc.css('To').empty?
+    assert !doc.css('Pickup').empty?
+    assert !doc.css('Packages').empty?
   end
 end
