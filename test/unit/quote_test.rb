@@ -3,11 +3,11 @@ require File.expand_path("#{File.dirname(__FILE__)}/../test_helper")
 class QuoteTest  < Test::Unit::TestCase
 
   def test_valid_quote
-    quote = EShipper::Quote.new({:service_id => '123', :service_name => 'vitamonthly'})
+    quote = EShipper::Quote.new({:service_id => '123', :service_name => 'fake service'})
 
     assert quote.validate!
     assert_equal '123', quote.service_id
-    assert_equal 'vitamonthly', quote.service_name
+    assert_equal 'fake service', quote.service_name
   end
 
   def test_invalid_quote
@@ -19,7 +19,7 @@ class QuoteTest  < Test::Unit::TestCase
   end
 
   def test_description_render_html_of_the_content_of_a_quote
-    quote = EShipper::Quote.new({:service_id => '123', :service_name => 'vitamonthly', :service_id => '4',
+    quote = EShipper::Quote.new({:service_id => '123', :service_name => 'fake service', :service_id => '4',
       :service_name => 'puralator express', :transport_mode => 'plane', :transit_days => '2', 
       :currency => 'CAD', :base_charge => '4.12', :fuel_surcharge => '2.0', :total_charge => '6.12'
     })
@@ -31,9 +31,9 @@ class QuoteTest  < Test::Unit::TestCase
     assert html.include?('4.12')
     assert html.include?('2.0')
     assert html.include?('6.12')
-    assert !html.include?('vitamonthly')
+    assert !html.include?('fake service')
 
-    quote_with_empty_attr = EShipper::Quote.new({:service_id => '123', :service_name => 'vitamonthly', :service_id => '4',
+    quote_with_empty_attr = EShipper::Quote.new({:service_id => '123', :service_name => 'fake service', :service_id => '4',
       :service_name => 'puralator express', :transport_mode => ''})
 
     html = quote_with_empty_attr.description

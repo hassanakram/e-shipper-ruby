@@ -13,7 +13,7 @@ class ShippingReplyTest  < Test::Unit::TestCase
     shipping_reply = EShipper::ShippingReply.new({:order_id => '123', :carrier_name => 'DHL', 
       :service_name => 'DHL express', :tracking_url => 'http://trac_me.com', :pickup_message => 'available at your door'
     })
-    quote = EShipper::Quote.new({:service_id => '123', :service_name => 'vitamonthly', :service_id => '4',
+    quote = EShipper::Quote.new({:service_id => '123', :service_name => 'fake service', :service_id => '4',
       :service_name => 'puralator express', :transport_mode => 'plane', :transit_days => '2', 
       :currency => 'CAD', :base_charge => '4.12', :fuel_surcharge => '2.0', :total_charge => '6.12'
     })

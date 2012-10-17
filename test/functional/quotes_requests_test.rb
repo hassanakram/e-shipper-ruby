@@ -10,24 +10,20 @@ class QuotesRequestsTest  < Test::Unit::TestCase
     @options[:pickup] = {:contactName => "Test Name", :phoneNumber => "888-888-8888", :pickupDate => t.strftime("%Y-%m-%d"),
         :pickupTime => t.strftime("%H:%M"), :closingTime => (t+2*60*60).strftime("%H:%M"), :location => "Front Door"}
   
-    package1_data = {:length => "15", :width => "10", :height => "12", :weight => "10",
-      :insuranceAmount => "120", :codAmount => "120"}
-    package2_data = {:length => "15", :width => "10", :height => "10", :weight => "5",
-      :insuranceAmount => "120", :codAmount => "120"}
-    
-    @options[:packages] = [package1_data, package2_data]
+    @options[:packages] = [{:length => "15", :width => "10", :height => "12", :weight => "10",
+      :insuranceAmount => "120", :codAmount => "120"}]
 
     @client = EShipper::Client.instance
   end
 
   def test_parse_quotes_e_shipper_with_destination_in_canada
-    @options[:from] = {:id => "123", :company => "Vitamonthly", :address1 => "650 CIT Drive", 
+    @options[:from] = {:id => "123", :company => "fake company", :address1 => "650 CIT Drive", 
       :city => "Livingston", :state => "ON", :zip => "L4J7Y9", :country => "CA",
-      :phone => '888-888-8888', :attention => 'vitamonthly', :email => 'damien@gmail.com'}
-      
-    @options[:to] = {:id => '234', :company => "Home", :address1 => "1725 Riverside Drive", :address2=>"Apt B-2",
-      :city => "Ottawa", :state => "ON", :zip => "K1G0E6", :country => "CA",
-      :phone => '888-888-8888', :attention => 'vitamonthly', :email => 'damien@gmail.com'}
+      :phone => '888-888-8888', :attention => 'fake attention', :email => 'eshipper@gmail.com'}
+
+    @options[:to] = {:id => "234", :company => "Healthwave", :address1 => "185 Rideau Street", :address2=>"Second Floor",
+      :city => "Ottawa", :state => "ON", :zip => "K1N 5X8", :country => "CA",
+      :phone => '888-888-8888', :attention => 'fake attention', :email => 'eshipper@gmail.com'}
     
     response = @client.parse_quotes @options
     assert_not_equal 0, response.count
@@ -57,13 +53,13 @@ class QuotesRequestsTest  < Test::Unit::TestCase
   end
 
   def test_sending_2_continous_requests_dont_break_the_server
-    @options[:from]= {:id => "123", :company => "Vitamonthly", :address1 => "650 CIT Drive", 
+    @options[:from] = {:id => "123", :company => "fake company", :address1 => "650 CIT Drive", 
       :city => "Livingston", :state => "ON", :zip => "L4J7Y9", :country => "CA",
-      :phone => '888-888-8888', :attention => 'vitamonthly', :email => 'damien@gmail.com'}
-      
-    @options[:to] = {:id => '234', :company => "Home", :address1 => "1725 Riverside Drive", :address2=>"Apt B-2",
-      :city => "Ottawa", :state => "ON", :zip => "K1G0E6", :country => "CA",
-      :phone => '888-888-8888', :attention => 'vitamonthly', :email => 'damien@gmail.com'}
+      :phone => '888-888-8888', :attention => 'fake attention', :email => 'eshipper@gmail.com'}
+
+    @options[:to] = {:id => "234", :company => "Healthwave", :address1 => "185 Rideau Street", :address2=>"Second Floor",
+      :city => "Ottawa", :state => "ON", :zip => "K1N 5X8", :country => "CA",
+      :phone => '888-888-8888', :attention => 'fake attention', :email => 'eshipper@gmail.com'}
 
     response = @client.parse_quotes @options
     assert_not_equal 0, response.count

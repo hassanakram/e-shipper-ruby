@@ -1,11 +1,9 @@
 require File.expand_path("#{File.dirname(__FILE__)}/../test_helper")
 
-class RequestTest  < Test::Unit::TestCase
-  def test_prepare_assigning_request_attrs
-    request = EShipper::Request.new
-    assert_equal [], request.packages
-    assert_equal [], request.references
-  
+class ShippingRequestTest  < Test::Unit::TestCase
+  def setup
+  	@shipping_request = EShipper::ShippingRequest.new
+
     options = {}
     options[:from] = {:id => "123", :company => "fake company", :address1 => "650 CIT Drive", 
       :city => "Livingston", :state => "ON", :zip => "L4J7Y9", :country => "CA",
@@ -20,11 +18,9 @@ class RequestTest  < Test::Unit::TestCase
     options[:pickup] = {:contactName => "Test Name", :phoneNumber => "888-888-8888", :pickupDate => t.strftime("%Y-%m-%d"),
         :pickupTime => t.strftime("%H:%M"), :closingTime => (t+2*60*60).strftime("%H:%M"), :location => "Front Door"}
 
-    options[:service_id] = '4'
-
     options[:packages] = [{:length => "15", :width => "10", :height => "12", :weight => "10",
       :insuranceAmount => "120", :codAmount => "120"}]
-   
+
     options[:references] = [{:name => "Vitamonthly", :code => "123"}]
 
     options[:invoice] = { :broker_name => 'John Doe', :contact_company => 'MERITCON INC',
@@ -34,14 +30,13 @@ class RequestTest  < Test::Unit::TestCase
 
     options[:items] = [{:code => '1234', :description => 'Laptop computer', :originCountry =>  'US', 
         :quantity => '100', :unitPrice => '1000.00'}]
-    
-    request.prepare! options
-    assert_not_nil request.from
-    assert_not_nil request.to
-    assert_not_nil request.pickup
-    assert_not_nil request.service_id
-    assert_not_nil request.packages
-    assert_not_nil request.references
-    assert_not_nil request.invoice
+
+    @shipping_request.prepare! options
+  end
+
+  #TODO: better xml content tests
+  def test_request_body_generating_a_well_formed_xml_quote_request
+  	xml = @shipping_request.request_body
+  	assert_not_nil xml
   end
 end

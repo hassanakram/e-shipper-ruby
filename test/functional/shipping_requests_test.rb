@@ -5,13 +5,13 @@ class ShippingRequestsTest  < Test::Unit::TestCase
   def setup
     @options = {}
 
-    @options[:from] = {:id => "123", :company => "Vitamonthly", :address1 => "650 CIT Drive", 
+    @options[:from] = {:id => "123", :company => "fake company", :address1 => "650 CIT Drive", 
       :city => "Livingston", :state => "ON", :zip => "L4J7Y9", :country => "CA",
-      :phone => '888-888-8888', :attention => 'vitamonthly', :email => 'damien@gmail.com'}
-      
-    @options[:to] = {:id => '234', :company => "Home", :address1 => "1725 Riverside Drive", :address2=>"Apt B-2",
-      :city => "Ottawa", :state => "ON", :zip => "K1G0E6", :country => "CA",
-      :phone => '888-888-8888', :attention => 'vitamonthly', :email => 'damien@gmail.com'}
+      :phone => '888-888-8888', :attention => 'fake attention', :email => 'eshipper@gmail.com'}
+
+    @options[:to] = {:id => "234", :company => "Healthwave", :address1 => "185 Rideau Street", :address2=>"Second Floor",
+      :city => "Ottawa", :state => "ON", :zip => "K1N 5X8", :country => "CA",
+      :phone => '888-888-8888', :attention => 'fake attention', :email => 'eshipper@gmail.com'}
 
     t = Time.now + 5 * 24 * 60 * 60 # 5 days from now
   

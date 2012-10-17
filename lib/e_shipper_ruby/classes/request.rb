@@ -45,9 +45,23 @@ module EShipper
       http_request = Net::HTTP::Post.new(uri.path)
       http_request.body = request_body
 
-      http_response = Net::HTTP.start(uri.host, uri.port) do |http|
+      http_session = Net::HTTP.new(uri.host, uri.port)
+      http_session.read_timeout = 3000
+      http_session.set_debug_output $stdout
+
+      # Don't set the CurrentCulture if Request.UserLanguages is null.
+      # In conclusion, if you get to a webpage that has the following content:
+      # <html><head><title>Object moved</title></head><body>
+      # <h2>Object moved to <a href="[url]">here</a>.</h2>
+      # </body></html>
+      # then you are probably trying to Response.Redirect to an empty URL.
+
+      http_response = http_session.start do |http|
         http.request(http_request)
       end
+
+      puts 'gem response details'
+      http_response.each { |k, v| puts "#{k} : #{v}" }
 
       http_response.body 
     end

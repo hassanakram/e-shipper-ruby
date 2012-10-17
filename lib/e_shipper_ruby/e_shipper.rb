@@ -16,7 +16,7 @@ module EShipper
         YAML.load_file(rails_config_path)[Rails.env] if File.exist?(rails_config_path)
       else
         gem_config_path = File.expand_path("#{File.dirname(__FILE__)}/../../conf/e_shipper.yml")
-        YAML.load_file(gem_config_path)['production'] if File.exist?(gem_config_path)
+        YAML.load_file(gem_config_path) if File.exist?(gem_config_path)
       end
       @options.symbolize_keys!
 
@@ -26,7 +26,7 @@ module EShipper
       raise 'No password specified.' if @password.nil? || @password.empty?
       if @url.nil? || @url.empty?
         @url = (defined?(Rails.env) && 'production' == Rails.env) ?
-          'http://www.eshipper.com/rpc2' : 'http://test.eshipper.com/eshipper/rpc2'
+          'http://www.eshipper.net/rpc2' : 'http://test.eshipper.com/eshipper/rpc2'
       end
     end
 
