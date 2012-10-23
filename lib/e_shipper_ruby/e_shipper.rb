@@ -26,7 +26,7 @@ module EShipper
       raise 'No password specified.' if @password.nil? || @password.empty?
       if @url.nil? || @url.empty?
         @url = (defined?(Rails.env) && 'production' == Rails.env) ?
-          'http://www.eshipper.net/rpc2' : 'http://test.eshipper.com/eshipper/rpc2'
+          'http://www.e-shipper.net/rpc2' : 'http://test.eshipper.com/eshipper/rpc2'
       end
     end
 
@@ -59,7 +59,7 @@ module EShipper
           result << quote
         end
       end      
-      result.sort_by(&:total_charge)
+      result
     end
 
     def parse_shipping(options={})
@@ -105,7 +105,7 @@ module EShipper
         keys = [:carrier_id, :carrier_name, :service_id, :service_name,
           :transport_mode, :transit_days, :currency, :base_charge,
           :fuel_surcharge, :total_charge
-        ]
+        ] 
         quote = EShipper::Quote.new(data(xml_quote, keys))
          
         surcharges = xml_quote.css('Surcharge')
