@@ -58,8 +58,8 @@ module EShipper
           end
           result << quote
         end
-      end      
-      result
+      end     
+      result.sort_by { |q| q.total_charge.to_f }
     end
 
     def parse_shipping(options={})
