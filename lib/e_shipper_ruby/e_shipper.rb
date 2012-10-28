@@ -141,6 +141,37 @@ module EShipper
       end
       cancel_reply
     end
+
+    def order_information(options={})
+      request = EShipper::OrderInformationRequest.new
+      request.prepare! options
+      response = request.send_now
+      @responses << EShipper::Response.new(:order_information, response) 
+
+      xml_data = Nokogiri::XML(response)
+      error_messages xml_data
+      
+      information = xml_data.css('OrderInformationReply')
+      
+      unless information.empty?
+        data = { :order_id => try_direct_extract(xml_data, 'Order', 'id'),
+          :status => try_direct_extract(xml_data, 'Status', 'statusName'),
+          :carrier => try_direct_extract(xml_data, 'Carrier', 'carrierName'),
+          :service => try_direct_extract(xml_data, 'Carrier', 'serviceName'),
+          :shipment_date => try_direct_extract(xml_data, 'ShipmentDate', 'Date')
+        }
+        info_reply = EShipper::InformationReply.new(data)
+        
+        history_status = information.css('OrderStatusHistory Status')
+        unless history_status.empty?
+          history_status.each do |xml_status|
+            keys = [:name, :date, :assigned_by, :comments]
+            info_reply.history << EShipper::Status.new(data(xml_status, keys, :cap_first_letter))
+          end
+        end
+      end
+      info_reply
+    end
     
     def last_response
       responses.last

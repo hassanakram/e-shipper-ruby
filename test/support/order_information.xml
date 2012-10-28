@@ -1,0 +1,33 @@
+<EShipper xmlns="http://www.eshipper.net/xml/XMLSchema" version="3.1.0">
+<OrderInformationReply>
+  <Order id="949986" />
+  <Carrier carrierName="CANADA WORLDWIDE INC." serviceName="Canada Worldwide Air Freight" />
+  <Reference code="" name="" />
+  <Package trackingNumber="0-1" />
+  <TrackingURL/>
+  <Pickup />
+  <Labels>[base-64 encoded String]</Labels>
+  <Status statusId="1" statusName="READY FOR SHIPPING" />
+  <Quote carrierId="3" carrierName="CANADA WORLDWIDE INC." serviceId="16" serviceName="Canada Worldwide Air Freight" modeTransport="" transitDays="0" currency="CAD" actualWeight="4" baseCharge="264.0" fuelSurcharge="31.68000030517578" totalCharge="314.1390003051758">
+    <Surcharge id="711564" name="Insurance" amount="3.5" />
+    <Surcharge id="711565" name="GST" amount="14.959000000000001" />
+  </Quote>
+  <OrderDetails>     
+    <PickupFrom Company="test" Id="2745215" Address1="My address" Address2="pune" City="THORNHILL" Province="ON" Postal="L4J7Y9" Country="CA" Residential ="N" Phone="8888888888" Email="test@test.co" Attn="mani" Instructions="Inst 1" />
+    <ShipTo Company="SumaSoft2" Id="2745214" Address1="My address" Address2="35" City="THORNHILL" Province="ON" Postal="L4J7Y9" Country="CA" Residential ="N" Phone="8888888888" Email="test@test.co" Attn="Mani" Instructions="Inst 2" />
+    <Packaging Type="Packaging">   
+      <Package Length="3" Width="2" Height="1" Weight="4" Description="   m 1 Desc" InsuranceAmount="$500.00"/>
+    </Packaging>
+    <Quantity Value="1" />
+    <Weight Value="4 lbs / 4 lbs" />
+    <Insurance Value="$500.00" />
+    <CarrierTracking No="0-1" />
+    <ShipmentDate Date="2010-03-29 00:00:00.0" />
+    <OrderStatusHistory>
+      <Status Name="PAYMENT CHECKING SUCCEED" Date="2010-03-28 14:35:10.0" AssignedBy="" Comments="fake comment"/>
+      <Status Name="READY FOR SHIPPING" Date="2010-03-29 14:35:10.0" AssignedBy="SYSTEM" Comments="fake comment"/>
+    </OrderStatusHistory>  
+  </OrderDetails>
+</OrderInformationReply>
+</EShipper>
+

@@ -17,8 +17,8 @@ module EShipper
       errors
     end
 
-    def try_extract(xml_node, value)
-      value = value.to_s.camel_case
+    def try_extract(xml_node, value, mode=:normal)
+      value = value.to_s.camel_case(mode)
       xml_node.attributes[value].content
     rescue NoMethodError
       ''
@@ -30,9 +30,9 @@ module EShipper
       ''
     end
     
-    def data(xml_node, attrs)
+    def data(xml_node, attrs, mode=:normal)
       data = {}
-      attrs.each { |attr| data[attr] = try_extract(xml_node, attr) }
+      attrs.each { |attr| data[attr] = try_extract(xml_node, attr, mode) }
       data
     end
   end

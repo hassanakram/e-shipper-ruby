@@ -1,5 +1,5 @@
 module EShipper
-  class CancelShippingRequest < EShipper::Request
+  class OrderInformationRequest < EShipper::Request
 	attr_reader :order_id
 	
 	def initialize
@@ -13,11 +13,11 @@ module EShipper
       client = EShipper::Client.instance
 
 	  builder = Nokogiri::XML::Builder.new do |xml|
-        xml.send(:'es:EShipper', :version => "3.0.0", :'xmlns:es' => "http://www.eshipper.net/XMLSchema", 
+        xml.send(:'es:EShipper', :version => "3.1.0", 'xmlns:es' => "http://www.eshipper.net/XMLSchema", 
             :username => client.username, :password => client.password) do
           
-          xml.ShipmentCancelRequest do
-            xml.Order(:orderId => @order_id)
+          xml.OrderInformationRequest do
+            xml.Order(:orderId => @order_id, :detailed => 'true')
           end
         end
       end		

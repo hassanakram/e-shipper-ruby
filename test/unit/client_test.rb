@@ -156,4 +156,32 @@ class ClientTest  < Test::Unit::TestCase
     assert !result
     assert !client.last_response.errors.empty?
   end
+  
+  def test_order_information_returns_the_status_of_the_order
+    client = EShipper::Client.instance
+    xml_path = "#{File.dirname(__FILE__)}/../support/order_information.xml"
+    doc = Nokogiri::XML(File.open(xml_path))
+    Nokogiri.stubs(:XML).returns doc
+    
+    result = client.order_information({})
+    assert result.is_a?(EShipper::InformationReply)
+    assert_equal '949986', result.order_id
+    assert_equal 'READY FOR SHIPPING', result.status
+    assert_equal Time.new('2010-03-29 00:00:00.0'), result.shipment_date
+    assert_equal 2, result.history.count
+    second_history_status = result.history[1]
+    assert_equal 'READY FOR SHIPPING', second_history_status.name
+    assert_equal Time.new('2010-03-29 14:35:10.0'), second_history_status.date
+  end
+    
+  def test_order_information_returns_nil_and_trap_e_shipper_error_message
+    client = EShipper::Client.instance
+    xml_path = "#{File.dirname(__FILE__)}/../support/error.xml"
+    doc = Nokogiri::XML(File.open(xml_path))
+    Nokogiri.stubs(:XML).returns doc
+    
+    result = client.order_information({})
+    assert !result
+    assert !client.last_response.errors.empty?
+  end
 end
