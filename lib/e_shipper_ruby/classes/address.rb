@@ -5,7 +5,8 @@ module EShipper
       :id, :company, :address1, :address2, 
       :city, :state, :country, :zip,
       :residential, :tailgateRequired, :phone,
-      :attention, :email, :instructions, :notifyRecipient
+      :attention, :email, :instructions, :confirmDelivery,
+      :notifyRecipient
     ]
 
     REQUIRED_FIELDS = [

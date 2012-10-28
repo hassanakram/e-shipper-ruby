@@ -1,9 +1,10 @@
 module EShipper
   class ShippingRequest < EShipper::Request
 
-		def request_body
+    def request_body
       client = EShipper::Client.instance
       options = COMMON_REQUEST_OPTIONS
+      options[:ShippingRequest].merge!(@options) if @options
       options[:ShippingRequest].merge!(:serviceId => @service_id) if @service_id
 
       builder = Nokogiri::XML::Builder.new do |xml|
@@ -14,6 +15,12 @@ module EShipper
 
             xml.From(@from.attributes) if @from
             xml.To(@to.attributes) if @to
+            
+            if @cod
+              xml.COD(:paymentType => @cod.payment_type) do
+				xml.CODReturnAddress(@cod.return_address)
+              end
+            end
             
             unless @packages.empty?
               xml.Packages(options[:Packages]) do
