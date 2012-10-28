@@ -132,4 +132,28 @@ class ClientTest  < Test::Unit::TestCase
     
     assert client.validate_last_response
   end
+  
+  def test_cancel_shipping_returns_the_status_of_the_cancellation_and_information
+    client = EShipper::Client.instance
+    xml_path = "#{File.dirname(__FILE__)}/../support/cancel_shipping.xml"
+    doc = Nokogiri::XML(File.open(xml_path))
+    Nokogiri.stubs(:XML).returns doc
+    
+    result = client.cancel_shipping({})
+    assert result.is_a?(EShipper::CancelReply)
+    assert_equal '383363', result.order_id
+    assert_equal 'Order has been cancelled!', result.message
+    assert_equal 'CANCELLED', result.status
+  end
+  
+  def test_cancel_shipping_returns_nil_and_trap_e_shipper_error_message
+    client = EShipper::Client.instance
+    xml_path = "#{File.dirname(__FILE__)}/../support/error.xml"
+    doc = Nokogiri::XML(File.open(xml_path))
+    Nokogiri.stubs(:XML).returns doc
+    
+    result = client.cancel_shipping({})
+    assert !result
+    assert !client.last_response.errors.empty?
+  end
 end

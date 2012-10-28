@@ -120,6 +120,28 @@ module EShipper
       shipping_reply
     end
 
+    def cancel_shipping(options={})
+      request = EShipper::CancelShippingRequest.new
+      request.prepare! options
+      response = request.send_now
+      @responses << EShipper::Response.new(:cancellation, response) 
+
+      xml_data = Nokogiri::XML(response)
+      error_messages xml_data
+      
+      cancel_data = xml_data.css('ShipmentCancelReply')
+      
+      unless cancel_data.empty?
+        data = { :order_id => try_direct_extract(xml_data, 'Order', 'orderId'), 
+          :message => try_direct_extract(xml_data, 'Order', 'message'),
+          :status => try_direct_extract(xml_data, 'Status', 'statusId')
+        }
+        cancel_reply = EShipper::CancelReply.new(data)
+        cancel_reply.status!
+      end
+      cancel_reply
+    end
+    
     def last_response
       responses.last
     end

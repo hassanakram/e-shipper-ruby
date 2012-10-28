@@ -49,7 +49,7 @@ module EShipper
 
       http_session = Net::HTTP.new(uri.host, uri.port)
       http_session.read_timeout = 3000
-      #http_session.set_debug_output $stdout
+      http_session.set_debug_output $stdout if $DEBUG
       
       http_response = http_session.start do |http|
         http.request(http_request)
