@@ -171,7 +171,7 @@ class ClientTest  < Test::Unit::TestCase
     assert_equal 2, result.history.count
     second_history_status = result.history[1]
     assert_equal 'READY FOR SHIPPING', second_history_status.name
-    assert_equal Time.new('2010-03-29 14:35:10.0'), second_history_status.date
+    assert_equal "2010-03-29 14:35:10.0", second_history_status.date
   end
     
   def test_order_information_returns_nil_and_trap_e_shipper_error_message

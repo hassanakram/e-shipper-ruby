@@ -11,5 +11,28 @@ module EShipper
       super
       self.shipment_date = Time.new(date) if date
     end
+
+    def history_description
+      doc = Nokogiri::HTML::DocumentFragment.parse ""
+      Nokogiri::HTML::Builder.with(doc) do |doc|
+        doc.div(:class => 'e_shipper_history_description') do
+          doc.h2 "History"
+          doc.ul do
+            history.each do |status|
+              doc.li do
+                doc.div(:class => 'e_shipper_historic_status') do
+                  doc.ul do
+                    status.attributes.each do |attr|
+                      doc.li "#{attr[0]}: #{attr[1]}" if attr[1] && (!attr[1].empty?)
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+      doc.to_html
+    end
   end
 end

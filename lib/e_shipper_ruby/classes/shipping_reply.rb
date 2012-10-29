@@ -28,7 +28,7 @@ module EShipper
 		    end
 		  end
 		  doc.div(:class => 'e_shipper_tracking_numbers') do
-			doc.h2 "Tracking numbers:"
+			doc.h2 "Tracking numbers"
 			doc.ul do	
 			  @package_tracking_numbers.each do |tracking_number|
 			    doc.li "#{tracking_number}"
@@ -36,7 +36,7 @@ module EShipper
 		    end
 		  end
 		  doc.div(:class => 'e_shipper_references') do
-		  	doc.h2 "References:"
+		  	doc.h2 "References"
 		  	doc.ul do
 			  @references.each do |reference|
 			    doc.li do
@@ -52,7 +52,7 @@ module EShipper
 		    end
 		  end
 		  doc.div(:class => 'e_shipper_quote_description') do
-		    doc.h2 "Quote description:"
+		    doc.h2 "Quote description"
 		    doc.ul do
 		      @quote.attributes.each do |attr|
 			    doc.li "#{attr[0]}: #{attr[1]}" if attr[1] && (!attr[1].empty?)

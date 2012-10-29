@@ -18,7 +18,7 @@ module EShipper
             
             if @cod
               xml.COD(:paymentType => @cod.payment_type) do
-				xml.CODReturnAddress(@cod.return_address)
+				        xml.CODReturnAddress(@cod.return_address)
               end
             end
             
