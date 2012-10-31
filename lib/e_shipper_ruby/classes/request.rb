@@ -3,8 +3,8 @@ module EShipper
     attr_reader :options, :from, :to, :pickup, :packages, :references, :service_id, :invoice, :cod
 
     COMMON_REQUEST_OPTIONS = {
-      :QuoteRequest => {:insuranceType => "Carrier"},
-      :ShippingRequest => {:insuranceType => "Carrier"},
+      :QuoteRequest => {:insuranceType => "eShipper"},
+      :ShippingRequest => {:insuranceType => "eShipper"},
       :Packages => {:type => "Package"},
       :Payment => {:type => "3rd Party"}
     }

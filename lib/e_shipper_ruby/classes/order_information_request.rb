@@ -1,21 +1,21 @@
 module EShipper
   class OrderInformationRequest < EShipper::Request
-	attr_reader :order_id
-	
-	def initialize
-	end
-	
-	def prepare!(data={})
-      @order_id = data[:order_id] if data[:order_id]
-	end
-		
+  	attr_reader :order_id
+  	
+  	def initialize
+  	end
+  	
+  	def prepare!(data={})
+        @order_id = data[:order_id] if data[:order_id]
+  	end
+  		
     def request_body
       client = EShipper::Client.instance
 
-	  builder = Nokogiri::XML::Builder.new do |xml|
+  	  builder = Nokogiri::XML::Builder.new do |xml|
         xml.send(:'es:EShipper', :version => "3.1.0", 'xmlns:es' => "http://www.eshipper.net/XMLSchema", 
-            :username => client.username, :password => client.password) do
-          
+          :username => client.username, :password => client.password) do
+            
           xml.OrderInformationRequest do
             xml.Order(:orderId => @order_id, :detailed => 'true')
           end

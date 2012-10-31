@@ -10,4 +10,8 @@ class String
       worlds.map(&:capitalize).join
     end
   end
+
+  def label
+    self.split(/[^a-z0-9]/i).map(&:capitalize).join(' ')
+  end
 end

@@ -32,8 +32,6 @@ class ShippingReplyTest  < Test::Unit::TestCase
     assert html.include?('789')
     #NOTE: test presence of references
     assert html.include?("Vitamonthly")
-    assert html.include?("AAA")
-    assert html.include?("BBB")
     #NOTE: test presence of quotes
     assert html.include?('puralator express')
     assert html.include?('2.0')

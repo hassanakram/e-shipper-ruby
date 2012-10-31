@@ -17,15 +17,11 @@ module EShipper
       Nokogiri::HTML::Builder.with(doc) do |doc|
         doc.div(:class => 'e_shipper_history_description') do
           doc.h2 "History"
-          doc.ul do
+          doc.div(:class => 'e_shipper_history', :style => 'margin-top:20px') do
             history.each do |status|
-              doc.li do
-                doc.div(:class => 'e_shipper_historic_status') do
-                  doc.ul do
-                    status.attributes.each do |attr|
-                      doc.li "#{attr[0]}: #{attr[1]}" if attr[1] && (!attr[1].empty?)
-                    end
-                  end
+              doc.ul do
+                status.attributes.each do |attr|
+                  doc.li "#{attr[0].label}: #{attr[1]}" if attr[1] && (!attr[1].empty?)
                 end
               end
             end

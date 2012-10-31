@@ -17,6 +17,8 @@ module EShipper
       attrs = self.attributes
       attrs.delete('labels')
       attrs.delete('customer_invoice')	
+      
+      rejected_attrs = %{carrier_id service_id currency} 
 
       doc = Nokogiri::HTML::DocumentFragment.parse ""
       Nokogiri::HTML::Builder.with(doc) do |doc|
@@ -24,7 +26,7 @@ module EShipper
 		  doc.h2 'Shipping description'
 		  doc.ul do
 		    attrs.each do |attr|
-			  doc.li "#{attr[0]}: #{attr[1]}" if attr[1] && (!attr[1].empty?)
+			  doc.li "#{attr[0].label}: #{attr[1]}" if attr[1] && (!attr[1].empty?)
 		    end
 		  end
 		  doc.div(:class => 'e_shipper_tracking_numbers') do
@@ -41,10 +43,8 @@ module EShipper
 			  @references.each do |reference|
 			    doc.li do
 			      doc.div(:class => 'e_shipper_reference_description') do
-			        doc.ul do
-		              reference.attributes.each do |attr|
-			            doc.li "#{attr[0]}: #{attr[1]}" if attr[1] && (!attr[1].empty?)
-		              end
+		            reference.attributes.each do |attr|
+			          doc.span "#{attr[1].label}    " if attr[1] && (!attr[1].empty?)
 		            end
 		          end
 			    end
@@ -55,7 +55,13 @@ module EShipper
 		    doc.h2 "Quote description"
 		    doc.ul do
 		      @quote.attributes.each do |attr|
-			    doc.li "#{attr[0]}: #{attr[1]}" if attr[1] && (!attr[1].empty?)
+		      	unless rejected_attrs.include?(attr[0]) || attr[1].empty?
+		      	  if %{base_charge fuel_surcharge total_charge}.include?(attr[0])
+		      	    doc.li "#{attr[0].label}: #{attr[1]}  $ CAD" 
+		          else
+			        doc.li "#{attr[0].label}: #{attr[1]}"
+			      end
+			    end
 		      end
 		    end
 		  end
@@ -63,6 +69,5 @@ module EShipper
       end
       doc.to_html
     end
-  
   end
 end
