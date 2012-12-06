@@ -18,7 +18,7 @@ module EShipper
     end
 
     def try_extract(xml_node, value, mode=:normal)
-      value = value.to_s.camel_case(mode)
+      value = value.to_s.e_shipper_camel_case(mode)
       xml_node.attributes[value].content
     rescue NoMethodError
       ''
