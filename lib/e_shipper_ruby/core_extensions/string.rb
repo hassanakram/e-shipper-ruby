@@ -1,5 +1,5 @@
 class String
-  def camel_case(mode=:normal)
+  def e_shipper_camel_case(mode=:normal)
     worlds = self.split(/[^a-z0-9]/i)
     case mode
     when :normal
