@@ -3,8 +3,8 @@ module EShipper
     attr_reader :options, :from, :to, :pickup, :packages, :references, :service_id, :invoice, :cod
 
     COMMON_REQUEST_OPTIONS = {
-      :QuoteRequest => {:insuranceType => "eShipper"},
-      :ShippingRequest => {:insuranceType => "eShipper"},
+      :QuoteRequest => {},
+      :ShippingRequest => {},
       :Packages => {:type => "Package"},
       :Payment => {:type => "3rd Party"}
     }
@@ -14,19 +14,19 @@ module EShipper
     end
 
     def prepare!(data={})
-	  @options = data[:options] if data[:options]
+    @options = data[:options] if data[:options]
       @from = EShipper::Address.new(data[:from]).validate! if data[:from]
       @to = EShipper::Address.new(data[:to]).validate! if data[:to]
       @pickup = EShipper::Pickup.new(data[:pickup]).validate! if data[:pickup]
       @service_id = data[:service_id] if data[:service_id]
       @cod = EShipper::Cod.new(data[:cod]).validate! if data[:cod]
-	  
-      if packages = data[:packages] 
+
+      if packages = data[:packages]
         packages.each do |package_data|
           @packages << EShipper::Package.new(package_data).validate!
         end
       end
- 
+
       if references = data[:references]
         references.each do |reference_data|
           @references << EShipper::Reference.new(reference_data).validate!
@@ -49,13 +49,13 @@ module EShipper
 
       http_session = Net::HTTP.new(uri.host, uri.port)
       http_session.read_timeout = 3000
-      http_session.set_debug_output $stdout 
-      
+      http_session.set_debug_output $stdout
+
       http_response = http_session.start do |http|
         http.request(http_request)
       end
 
-      http_response.body 
+      http_response.body
     end
   end
 end
